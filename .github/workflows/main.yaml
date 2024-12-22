@@ -51,7 +51,7 @@ jobs:
         name: coverage-data-${{ matrix.python-version }}
         path: '${{ github.workspace }}/.coverage.*'
         include-hidden-files: true
-        if-no-files-found: continue
+        if-no-files-found: warn
 
   coverage:
     name: Coverage
