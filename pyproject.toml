@@ -1,0 +1,44 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools",
+]
+
+
+
+[project]
+name = "django-qstash"
+version = "0.1.0"
+description = "A drop-in replacement for Celery's shared_task with Upstash QStash."
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+  { name = "Justin Mitchel", email = "justin@codingforentrepreneurs.com" }
+]
+requires-python = ">=3.10"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "Framework :: Django :: 5.1",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+
+dependencies = [
+  "django>=4.2",
+  "requests>=2.30.0",
+  "qstash>=2.0.0"
+]
+urls.Changelog = "https://github.com/jmitchel3/django-qstash"
+urls.Documentation = "https://github.com/jmitchel3/django-qstash"
+urls.Funding = "https://github.com/jmitchel3/django-qstash"
+urls.Repository = "https://github.com/jmitchel3/django-qstash"
