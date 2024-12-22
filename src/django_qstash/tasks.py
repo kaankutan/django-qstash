@@ -1,5 +1,4 @@
 import functools
-import json
 from typing import Any, Callable, Dict, Optional, Tuple
 
 from django.conf import settings
@@ -7,15 +6,12 @@ from django.core.exceptions import ImproperlyConfigured
 from qstash import QStash
 
 QSTASH_TOKEN = getattr(settings, "QSTASH_TOKEN", None)
-DJANGO_QSTASH_CALLBACK_URL = getattr(settings, "DJANGO_QSTASH_CALLBACK_URL", None)
+DJANGO_QSTASH_DOMAIN = getattr(settings, "DJANGO_QSTASH_DOMAIN", None)
 DJANGO_QSTASH_WEBHOOK_PATH = getattr(
     settings, "DJANGO_QSTASH_WEBHOOK_PATH", "/qstash/webhook/"
 )
-
-if not QSTASH_TOKEN or not DJANGO_QSTASH_CALLBACK_URL:
-    raise ImproperlyConfigured(
-        "QSTASH_TOKEN and DJANGO_QSTASH_CALLBACK_URL must be set"
-    )
+if not QSTASH_TOKEN or not DJANGO_QSTASH_DOMAIN:
+    raise ImproperlyConfigured("QSTASH_TOKEN and DJANGO_QSTASH_DOMAIN must be set")
 
 # Initialize QStash client once
 qstash_client = QStash(QSTASH_TOKEN)
@@ -35,7 +31,7 @@ class QStashTask:
         self.delay_seconds = delay_seconds
         self.deduplicated = deduplicated
         self.options = options
-        self.callback_url = DJANGO_QSTASH_CALLBACK_URL.rstrip("/")
+        self.callback_domain = DJANGO_QSTASH_DOMAIN.rstrip("/")
         self.webhook_path = DJANGO_QSTASH_WEBHOOK_PATH.strip("/")
 
         if func is not None:
@@ -77,11 +73,11 @@ class QStashTask:
         }
 
         # Ensure callback URL is properly formatted
-        callback_url = self.callback_url
-        if not callback_url.startswith(("http://", "https://")):
-            callback_url = f"https://{callback_url}"
+        callback_domain = self.callback_domain
+        if not callback_domain.startswith(("http://", "https://")):
+            callback_domain = f"https://{callback_domain}"
 
-        url = f"{callback_url}/{self.webhook_path}/"
+        url = f"{callback_domain}/{self.webhook_path}/"
         # Send to QStash using the official SDK
         response = qstash_client.message.publish_json(
             url=url,
