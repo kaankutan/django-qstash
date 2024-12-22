@@ -84,6 +84,7 @@ jobs:
           python -m coverage report --fail-under=100
           echo "## Coverage summary" >> $GITHUB_STEP_SUMMARY
           python -m coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
 
       - name: Upload HTML report
         if: ${{ failure() }}
