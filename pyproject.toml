@@ -6,7 +6,7 @@ requires = [
 
 [project]
 name = "django-qstash"
-version = "0.0.1"
+version = "0.0.2"
 description = "A drop-in replacement for Celery's shared_task with Upstash QStash."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -95,7 +95,7 @@ warn_unreachable = true
 
 [[tool.mypy.overrides]]
 module = "tests.*"
-allow_untyped_defs = true
+disallow_untyped_defs = false
 
 [tool.rstcheck]
 ignore_directives = [
