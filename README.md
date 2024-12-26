@@ -1,3 +1,5 @@
+> :warning: **BETA Software**: Working on being production-ready soon.
+
 # Django QStash `pip install django-qstash`
 
 A drop-in replacement for Celery's shared_task leveraging Upstash QStash for a truly serverless Django application to run background tasks asynchronously from the request/response cycle.
