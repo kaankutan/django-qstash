@@ -1,0 +1,4 @@
+django
+faker
+python-decouple
+django-qstash
