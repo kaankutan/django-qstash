@@ -72,6 +72,9 @@ source = [
   "django_qstash",
   "tests",
 ]
+omit = [
+  "*/migrations/*",
+]
 
 [tool.coverage.paths]
 source = [

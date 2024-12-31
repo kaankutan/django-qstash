@@ -13,6 +13,9 @@ from django_qstash.exceptions import TaskError
 from django_qstash.handlers import QStashWebhook
 from django_qstash.handlers import TaskPayload
 
+# Add pytest mark for database access
+pytestmark = pytest.mark.django_db
+
 
 class TestTaskPayload:
     def test_from_dict_valid(self):
