@@ -283,15 +283,21 @@ Args:
 
 ## Motivation
 
-I have so many side projects that I use Django with -- some are from tutorials based on my work at [CFE](https://cfe.sh) and some are new businesses that haven't found much traction yet.
+TLDR - Celery cannot be serverless. I want serverless "Celery" so I only pay for the apps that have attention and traffic. Upstash created QStash to help solve the problem of message queues in a serverless environment. django-qstash is the goldilocks that combines the functionality of Celery with the functionality of QStash all to unlock fully serverless Django.
 
-I'd argue that all projects could benefit from using async background tasks -- such as sending emails, running reports, or updating databases. My side projects are no different.
+I run a lot of side projects with Django. Some as demos for tutorials based on my work at [@codingforentrepreneurs](https://cfe.sh/github) and some are new businesses that haven't found much traction yet.
 
-The problem is that running async backgrounds in a serverless environment is difficult.
+Most web apps can benefit from async background tasks such as sending emails, running reports, or updating databases.
 
-Running Django in a serverless environment is not difficult any more thanks to Docker and the countless hosting options and services out there.
+But how?
 
-Let's face it. Celery is a powerful tool to run async background tasks but it comes at a cost. It needs at least one server running 24/7. It also needs Redis or RabbitMQ.
+Traditionally, I'd reach for Celery but that can get expensive really quick. Running a lot of Django projects can add up too -- "death by a thousand cuts" if you will. A server for Django, for celery worker, for celery beat scheduler, and so on. It adds up fast.
+
+I think serverless is the answer. Pay for what you use and scale to zero when you don't need it and scale up when you do -- all automated.
+
+Django can be serverless and is pretty easy to do thanks to Docker and the countless hosting options and services out there. Celery cannot be serverless, at least yet.
+
+Let's face it. Celery is a powerful tool to run async background tasks but it comes at a cost. It needs at least one server running 24/7. For best performance it needs 2 (one worker, one beat). It also needs Redis or RabbitMQ. Most background processes that are tied to web apps are not serverless; they have to "listen" for their next task.
 
 To make Django truly scale-to-zero and serverless, we need to drop Celery.
 
@@ -299,12 +305,10 @@ Enter __django-qstash__.
 
 django-qstash is designed to be a near drop-in replacement for Celery's `shared_task` decorator.
 
-It works by leveraging Upstash QStash to deliver messages about your tasks (e.g. the function's arguments) via webhooks to your Django application.
-
-django-qstash is here to unlock scale-to-zero with Django by asynchronously running background tasks through webhooks all thanks to Upstash.com's QStash service. From the QStash [docs](https://upstash.com/docs/qstash/overall/getstarted), it is a:
+It works by leveraging Upstash QStash to deliver messages about your tasks (e.g. the function's arguments) via webhooks to your Django application.  In the QStash [docs](https://upstash.com/docs/qstash/overall/getstarted), it is described as:
 
 > QStash is a serverless messaging and scheduling solution. It fits easily into your existing workflow and allows you to build reliable systems without managing infrastructure.
 >
 > Instead of calling an endpoint directly, QStash acts as a middleman between you and an API to guarantee delivery, perform automatic retries on failure, and more.
 
-While QStash is easy to use and inexpensive, it is a message queue and was not designed as a drop-in replacement for Celery or directly for Django. That's why Django-QStash exists.
+django-qstash has a webhook handler that converts a QStash message to run a specific `@shared_task` function (the one that called `.delay()` or `.apply_async()`). It's easy, it's cheap, it's effective, and best of all, it unlocks the scale-to-zero potential of Django as a serverless app.
