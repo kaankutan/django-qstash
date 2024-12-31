@@ -90,6 +90,7 @@ class QStashWebhook:
 
     def handle_request(self, request: HttpRequest) -> tuple[dict, int]:
         """Process webhook request and return response data and status code."""
+        payload = None  # Initialize payload as None
         try:
             body = request.body.decode()
             self.verify_signature(
@@ -130,7 +131,7 @@ class QStashWebhook:
                 "status": "error",
                 "error_type": e.__class__.__name__,
                 "error": str(e),
-                "task_name": payload.task_name,
+                "task_name": payload.task_name if payload else None,
             }, 500
         except Exception as e:
             logger.exception("Unexpected error in webhook handler: %s", str(e))
