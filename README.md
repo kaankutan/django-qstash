@@ -20,6 +20,7 @@ Depends on:
 # from celery import shared_task
 from django_qstash import shared_task
 
+
 @shared_task
 def math_add_task(a, b, save_to_file=False):
     logger.info(f"Adding {a} and {b}")
@@ -44,23 +45,24 @@ math_add_task.delay(12, 454, save_to_file=True)
 
 
 ```python
-QSTASH_TOKEN="your_token"
-QSTASH_CURRENT_SIGNING_KEY="your_current_signing_key"
-QSTASH_NEXT_SIGNING_KEY="your_next_signing_key"
+QSTASH_TOKEN = "your_token"
+QSTASH_CURRENT_SIGNING_KEY = "your_current_signing_key"
+QSTASH_NEXT_SIGNING_KEY = "your_next_signing_key"
 
 # required for django-qstash
-DJANGO_QSTASH_DOMAIN="https://example.com"
-DJANGO_QSTASH_WEBHOOK_PATH="/qstash/webhook/"
+DJANGO_QSTASH_DOMAIN = "https://example.com"
+DJANGO_QSTASH_WEBHOOK_PATH = "/qstash/webhook/"
 ```
 
 
+`DJANGO_QSTASH_DOMAIN`: Must be a valid and publicly accessible domain. For example `https://djangoqstash.com`
 
-`DJANGO_QSTASH_DOMAIN`: Must be a valid and publicly accessible domain. For example `https://djangoqstash.net`
-
-In development mode, we recommend using a tunnel like [Cloudflare Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) with a domain name you control. You can also consider [ngrok](https://ngrok.com/). 
-
-
-`DJANGO_QSTASH_WEBHOOK_PATH`: The path where QStash will send webhooks to your Django application. Defaults to `/qstash/webhook/`
+In development mode, we recommend using a tunnel like [Cloudflare Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) with a domain name you control. You can also consider [ngrok](https://ngrok.com/).
 
 
-`DJANGO_QSTASH_FORCE_HTTPS`: Whether to force HTTPS for the webhook. Defaults to `True`.
+`DJANGO_QSTASH_WEBHOOK_PATH` (default:`/qstash/webhook/`): The path where QStash will send webhooks to your Django application.
+
+
+`DJANGO_QSTASH_FORCE_HTTPS` (default:`True`): Whether to force HTTPS for the webhook.
+
+`DJANGO_QSTASH_RESULT_TTL` (default:`604800`): A number of seconds after which task result data can be safely deleted. Defaults to 604800 seconds (7 days or 7 * 24 * 60 * 60).
