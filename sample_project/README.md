@@ -1,18 +1,12 @@
 Example Django Application
 ===================
 
-Use Python 3.13 to set up and run with these commands:
-
-```
-echo "QSTASH_TOKEN=your_token" >> .env
-echo "QSTASH_CALLBACK_URL=your_callback_url" >> .env
-```
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 python -m pip install -r requirements.txt -e ..
-DEBUG=1 python manage.py runserver
+python manage.py runserver
 ```
 
 Open it at http://127.0.0.1:8000/ .
