@@ -91,3 +91,58 @@ class TestQStashWebhook:
         assert status == 400
         assert response["status"] == "error"
         assert response["error_type"] == "SignatureError"
+
+    def test_handle_request_task_error(self, webhook):
+        request = Mock(spec=HttpRequest)
+        request.body = json.dumps(
+            {"function": "test_func", "module": "test_module", "args": [], "kwargs": {}}
+        ).encode()
+        request.headers = {"Upstash-Signature": "valid", "Upstash-Message-Id": "123"}
+        request.build_absolute_uri.return_value = "https://example.com"
+
+        with (
+            patch.object(webhook, "verify_signature"),
+            patch.object(webhook, "execute_task") as mock_execute,
+        ):
+            mock_execute.side_effect = TaskError("Task failed")
+            response, status = webhook.handle_request(request)
+
+        assert status == 500
+        assert response["status"] == "error"
+        assert response["error_type"] == "TaskError"
+        assert response["error"] == "Task failed"
+        assert response["task_name"] is not None
+
+    def test_handle_request_unexpected_error(self, webhook):
+        request = Mock(spec=HttpRequest)
+        request.body = json.dumps(
+            {"function": "test_func", "module": "test_module", "args": [], "kwargs": {}}
+        ).encode()
+        request.headers = {"Upstash-Signature": "valid"}
+        request.build_absolute_uri.return_value = "https://example.com"
+
+        with patch.object(webhook, "verify_signature") as mock_verify:
+            mock_verify.side_effect = Exception("Unexpected error")
+            response, status = webhook.handle_request(request)
+
+        assert status == 500
+        assert response["status"] == "error"
+        assert response["error_type"] == "InternalServerError"
+        assert response["error"] == "An unexpected error occurred"
+        assert response["task_name"] is None
+
+    def test_execute_task_with_actual_func(self, webhook):
+        def actual_function(*args, **kwargs):
+            return "actual result"
+
+        mock_func = Mock()
+        mock_func.actual_func = actual_function
+
+        payload = Mock(function_path="test.path", args=[1, 2], kwargs={"key": "value"})
+
+        with patch(
+            "django_qstash.handlers.utils.import_string", return_value=mock_func
+        ):
+            result = webhook.execute_task(payload)
+
+        assert result == "actual result"
