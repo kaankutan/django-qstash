@@ -8,3 +8,5 @@ scripts:
     - venv/bin/python3 -m pytest
   sample_server:
     - cd sample_project && ../venv/bin/python manage.py runserver 8133
+  bump:
+    - venv/bin/bump2version patch
