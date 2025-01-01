@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.0.5] - 2025-01-01
+
+No changes, testing bump2version.
+
 ## [0.0.4] - 2025-01-01
 
 ### Added
