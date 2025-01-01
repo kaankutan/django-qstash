@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import functools
-from typing import Any, Callable, Dict, Optional, Tuple
+import warnings
+from typing import Any
+from typing import Callable
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -11,7 +15,11 @@ DJANGO_QSTASH_WEBHOOK_PATH = getattr(
     settings, "DJANGO_QSTASH_WEBHOOK_PATH", "/qstash/webhook/"
 )
 if not QSTASH_TOKEN or not DJANGO_QSTASH_DOMAIN:
-    raise ImproperlyConfigured("QSTASH_TOKEN and DJANGO_QSTASH_DOMAIN must be set")
+    warnings.warn(
+        "QSTASH_TOKEN and DJANGO_QSTASH_DOMAIN should be set for QStash functionality",
+        RuntimeWarning,
+        stacklevel=2,
+    )
 
 # Initialize QStash client once
 qstash_client = QStash(QSTASH_TOKEN)
@@ -20,11 +28,11 @@ qstash_client = QStash(QSTASH_TOKEN)
 class QStashTask:
     def __init__(
         self,
-        func: Optional[Callable] = None,
-        name: Optional[str] = None,
-        delay_seconds: Optional[int] = None,
+        func: Callable | None = None,
+        name: str | None = None,
+        delay_seconds: int | None = None,
         deduplicated: bool = False,
-        **options: Dict[str, Any],
+        **options: dict[str, Any],
     ):
         self.func = func
         self.name = name or (func.__name__ if func else None)
@@ -45,6 +53,10 @@ class QStashTask:
         """
         Execute the task, either directly or via QStash based on context
         """
+        if not QSTASH_TOKEN or not DJANGO_QSTASH_DOMAIN:
+            raise ImproperlyConfigured(
+                "QSTASH_TOKEN and DJANGO_QSTASH_DOMAIN must be set to use django-qstash"
+            )
         # Handle the case when the decorator is used without parameters
         if self.func is None:
             return self.__class__(
@@ -89,18 +101,18 @@ class QStashTask:
         # Return an AsyncResult-like object for Celery compatibility
         return AsyncResult(response.message_id)
 
-    def delay(self, *args, **kwargs) -> "AsyncResult":
+    def delay(self, *args, **kwargs) -> AsyncResult:
         """Celery-compatible delay() method"""
         self._is_delayed = True
         return self(*args, **kwargs)
 
     def apply_async(
         self,
-        args: Optional[Tuple] = None,
-        kwargs: Optional[Dict] = None,
-        countdown: Optional[int] = None,
-        **options: Dict[str, Any],
-    ) -> "AsyncResult":
+        args: tuple | None = None,
+        kwargs: dict | None = None,
+        countdown: int | None = None,
+        **options: dict[str, Any],
+    ) -> AsyncResult:
         """Celery-compatible apply_async() method"""
         self._is_delayed = True
         if countdown is not None:
@@ -119,7 +131,7 @@ class AsyncResult:
     def __init__(self, task_id: str):
         self.task_id = task_id
 
-    def get(self, timeout: Optional[int] = None) -> Any:
+    def get(self, timeout: int | None = None) -> Any:
         """Simulate Celery's get() method"""
         raise NotImplementedError("QStash doesn't support result retrieval")
 
@@ -129,10 +141,10 @@ class AsyncResult:
 
 
 def shared_task(
-    func: Optional[Callable] = None,
-    name: Optional[str] = None,
+    func: Callable | None = None,
+    name: str | None = None,
     deduplicated: bool = False,
-    **options: Dict[str, Any],
+    **options: dict[str, Any],
 ) -> QStashTask:
     """
     Decorator that mimics Celery's shared_task
