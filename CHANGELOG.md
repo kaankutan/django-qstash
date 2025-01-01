@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [0.0.4] - 2025-01-01
+
+### Added
+- moved configuration requirements to execution time
+
+
 ## [0.0.3] - 2024-12-30
 
 ### Added
