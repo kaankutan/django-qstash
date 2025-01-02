@@ -7,7 +7,8 @@ from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.db import models
 
-from django_qstash.schedules.client import QStashScheduleClient
+from django_qstash.callbacks import get_callback_url
+from django_qstash.client import qstash_client
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,11 @@ class Command(BaseCommand):
             action="store_true",
             help="Sync schedules from QStash to local database",
         )
+        parser.add_argument(
+            "--no-input",
+            action="store_true",
+            help="Do not ask for confirmation",
+        )
 
     def get_task_schedule_model(self) -> models.Model | None:
         """Get the TaskSchedule model if available."""
@@ -40,13 +46,10 @@ class Command(BaseCommand):
                     "Add `django_qstash.schedules` to INSTALLED_APPS and run migrations."
                 )
             )
-            return None
 
     def sync_schedules(self, schedules: list) -> None:
         """Sync remote schedules to local database."""
         TaskSchedule = self.get_task_schedule_model()
-        if not TaskSchedule:
-            return
 
         for schedule in schedules:
             try:
@@ -72,6 +75,7 @@ class Command(BaseCommand):
                 logger.exception("Failed to sync schedule %s", schedule.schedule_id)
 
     def handle(self, *args, **options) -> None:
+        auto_confirm = options.get("no_input")
         if not (options.get("sync") or options.get("list")):
             self.stdout.write(
                 self.style.ERROR("Please specify either --list or --sync option")
@@ -79,9 +83,8 @@ class Command(BaseCommand):
             return
 
         try:
-            client = QStashScheduleClient()
-            destination = client._get_callback_url()
-            schedules = client.list_schedules()
+            destination = get_callback_url()
+            schedules = qstash_client.schedule.list()
 
             self.stdout.write(
                 self.style.SUCCESS(
@@ -105,8 +108,9 @@ class Command(BaseCommand):
 
             if options.get("sync"):
                 user_input = input("Do you want to sync remote schedules? (y/n): ")
-                if user_input.lower() == "y":
+                if user_input.lower() == "y" or auto_confirm:
                     self.sync_schedules(schedules)
-
+                else:
+                    self.stdout.write(self.style.ERROR("Sync cancelled"))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"An error occurred: {str(e)}"))
