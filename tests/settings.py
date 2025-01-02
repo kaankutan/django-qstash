@@ -13,6 +13,7 @@ DATABASES = {
 INSTALLED_APPS: list[str] = [
     "django_qstash",
     "django_qstash.results",
+    "django_qstash.schedules",
 ]
 
 MIDDLEWARE: list[str] = [

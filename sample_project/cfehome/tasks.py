@@ -13,7 +13,7 @@ math_add_task.apply_async(args=(12, 12), delay=10)
 """
 
 
-@shared_task
+@shared_task(name="Math adder")
 def math_add_task(a, b, *args, **kwargs):
     logger.info("Adding %s and %s", a, b)
     with open("test.txt", "w") as f:

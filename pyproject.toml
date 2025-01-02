@@ -74,6 +74,8 @@ source = [
 ]
 omit = [
   "*/migrations/*",
+  "*/admin.py",
+  "tests/*",
 ]
 
 [tool.coverage.paths]

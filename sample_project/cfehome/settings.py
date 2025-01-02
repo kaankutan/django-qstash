@@ -15,8 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 
-SECRET_KEY = get_random_secret_key()
-
+SECRET_KEY = config("DJANGO_SECRET_KEY", default=get_random_secret_key())
 # required by qstash-py
 QSTASH_TOKEN = config("QSTASH_TOKEN")
 QSTASH_CURRENT_SIGNING_KEY = config("QSTASH_CURRENT_SIGNING_KEY")
@@ -44,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_qstash",
     "django_qstash.results",
+    "django_qstash.schedules",
 ]
 
 MIDDLEWARE = [
