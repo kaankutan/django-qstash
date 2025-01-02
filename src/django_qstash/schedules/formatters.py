@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from django_qstash.callbacks import get_callback_url
 from django_qstash.schedules.models import TaskSchedule
 
 
@@ -23,7 +24,7 @@ def prepare_qstash_payload(instance: TaskSchedule) -> dict[str, Any]:
 
 def format_task_schedule_for_qstash(instance: TaskSchedule) -> dict[str, Any]:
     payload = prepare_qstash_payload(instance)
-    callback_url = instance.get_callback_url()
+    callback_url = get_callback_url()
     data = {
         "destination": callback_url,
         "body": json.dumps(payload),

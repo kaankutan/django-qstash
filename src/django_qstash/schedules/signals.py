@@ -9,7 +9,7 @@ from django_qstash.schedules.models import TaskSchedule
 
 
 @receiver(post_save, sender=TaskSchedule)
-def sync_schedule_to_qstash(sender, instance, created, **kwargs):
+def sync_schedule_to_qstash_receiver(sender, instance, created, **kwargs):
     """
     Sync the django-qstash TaskSchedule to QStash on save.
     """
@@ -17,5 +17,5 @@ def sync_schedule_to_qstash(sender, instance, created, **kwargs):
 
 
 @receiver(pre_delete, sender=TaskSchedule)
-def delete_schedule_from_qstash(sender, instance, **kwargs):
+def delete_schedule_from_qstash_receiver(sender, instance, **kwargs):
     services.delete_task_schedule_from_qstash(instance)

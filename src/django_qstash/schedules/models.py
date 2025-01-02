@@ -106,23 +106,15 @@ class TaskSchedule(models.Model):
         super().save(*args, **kwargs)
 
     def did_just_resume(self, delta_seconds: int = 60) -> bool:
-        if not self.is_resumed:
+        if not self.is_resumed or not self.resumed_at:
             return False
-        last_updated_at = self.updated_at
-        last_updated_at_delta = last_updated_at - timedelta(seconds=delta_seconds)
-        return self.resumed_at > last_updated_at_delta
+        now = timezone.now()
+        delta_window = now - timedelta(seconds=delta_seconds)
+        return self.resumed_at >= delta_window
 
     def did_just_pause(self, delta_seconds: int = 60) -> bool:
-        if not self.is_paused:
+        if not self.is_paused or not self.paused_at:
             return False
-        last_updated_at = self.updated_at
-        last_updated_at_delta = last_updated_at - timedelta(seconds=delta_seconds)
-        return self.paused_at > last_updated_at_delta
-
-    def get_callback_url(self) -> str:
-        """
-        Callback URL based directly on the settings.
-        """
-        callback_domain = DJANGO_QSTASH_DOMAIN.rstrip("/")
-        webhook_path = DJANGO_QSTASH_WEBHOOK_PATH.strip("/")
-        return f"{callback_domain}/{webhook_path}/"
+        now = timezone.now()
+        delta_window = now - timedelta(seconds=delta_seconds)
+        return self.paused_at >= delta_window
