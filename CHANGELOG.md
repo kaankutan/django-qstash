@@ -3,9 +3,17 @@
 All notable changes to this project will be documented in this file.
 
 
-## [0.0.6] - 2025-01-01
+## [0.0.7] - 2025-01-02
 
-## Added
+### Added
+- New test cases for django management commands
+
+### Removed
+- Import bug in django management commands
+
+## [0.0.6] - 2025-01-02
+
+### Added
 - `django_qstash.schedules` for QStash Schedules
 - Added task schedule management command to sync QStash schedules with Django models
 - Updated Tests for django_qstash.schedules
