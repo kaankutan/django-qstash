@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from datetime import timedelta
-
-from django.apps import apps
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.utils import timezone
+
+from django_qstash.results.tasks import clear_stale_results_task
 
 DJANGO_QSTASH_RESULT_TTL = getattr(settings, "DJANGO_QSTASH_RESULT_TTL", 604800)
 
@@ -25,37 +23,20 @@ class Command(BaseCommand):
             type=int,
             help="The number of seconds ago to clear results for",
         )
+        parser.add_argument(
+            "--delay", action="store_true", help="Offload request using django_qstash"
+        )
 
     def handle(self, *args, **options):
+        delay = options["delay"]
         no_input = options["no_input"]
         since = options.get("since") or DJANGO_QSTASH_RESULT_TTL
-        cutoff_date = timezone.now() - timedelta(seconds=since)
-        try:
-            TaskResult = apps.get_model("django_qstash_results", "TaskResult")
-        except LookupError:
-            self.stdout.write(
-                self.style.ERROR(
-                    "Django QStash Results not installed.\nAdd `django_qstash.results` to INSTALLED_APPS and run migrations."
-                )
+        user_confirm = not no_input
+        if not delay:
+            clear_stale_results_task(
+                since=since, user_confirm=user_confirm, stdout=self.stdout
             )
-            return
-        to_delete = TaskResult.objects.filter(date_done__lt=cutoff_date)
-
-        if not to_delete.exists():
-            self.stdout.write("No stale Django QStash task results found")
-            return
-
-        # use input to confirm  deletion
-        self.stdout.write(
-            f"Deleting {to_delete.count()} task results older than {cutoff_date} ({DJANGO_QSTASH_RESULT_TTL} seconds)"
-        )
-        if not no_input:
-            if input("Are you sure? (y/n): ") != "y":
-                self.stdout.write("Skipping deletion")
-                return
-
-        deleted_count, _ = to_delete.delete()
-
-        self.stdout.write(
-            self.style.SUCCESS(f"Successfully deleted {deleted_count} stale results.")
-        )
+        else:
+            clear_stale_results_task.delay(
+                since=since, user_confirm=user_confirm, stdout=self.stdout
+            )

@@ -70,7 +70,6 @@ branch = true
 parallel = true
 source = [
   "django_qstash",
-  "tests",
 ]
 omit = [
   "*/migrations/*",
@@ -80,8 +79,8 @@ omit = [
 
 [tool.coverage.paths]
 source = [
-  "src",
-  ".tox/**/site-packages",
+  "src/django_qstash",
+  ".tox/*/lib/python*/site-packages/django_qstash",
 ]
 
 [tool.coverage.report]

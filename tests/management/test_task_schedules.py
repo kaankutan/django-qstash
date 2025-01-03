@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from io import StringIO
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -202,8 +203,16 @@ class TestTaskSchedulesCommand:
             in captured.out
         )
 
+    @pytest.fixture
+    def command_output(self):
+        stdout = StringIO()
+        stderr = StringIO()
+        yield stdout, stderr
+        stdout.close()
+        stderr.close()
+
     @patch("django_qstash.management.commands.task_schedules.qstash_client")
-    def test_sync_command_error(self, mock_client, capsys):
+    def test_sync_command_error(self, mock_client, command_output):
         """Test that command handles errors during sync"""
         # Mock the schedule response with invalid data to trigger an error
         mock_schedule = Mock()
@@ -212,10 +221,12 @@ class TestTaskSchedulesCommand:
         mock_schedule.body = '{"invalid": "data"}'  # This will cause a KeyError
         mock_client.schedule.list.return_value = [mock_schedule]
 
-        call_command("task_schedules", "--sync", "--no-input")
+        stdout, stderr = command_output
+        call_command(
+            "task_schedules", "--sync", "--no-input", stdout=stdout, stderr=stderr
+        )
 
-        captured = capsys.readouterr()
-        assert "An error occurred: " in captured.out
+        assert "An error occurred: " in stdout.getvalue()
 
     @patch("django_qstash.management.commands.task_schedules.qstash_client")
     @patch("builtins.input", return_value="n")
