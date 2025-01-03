@@ -12,7 +12,7 @@ def test_discovers_basic_task():
     expected_tasks = [
         (
             "tests.discovery.tasks.custom_name_task",
-            "Custom Name Task (tests.discovery.tasks.custom_name_task)",
+            "Custom Name Task (tests.discovery.tasks)",
         ),
         (
             "tests.discovery.tasks.debug_task",
