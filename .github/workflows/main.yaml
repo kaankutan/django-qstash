@@ -3,9 +3,17 @@ name: CI
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - '**'
+      - '**'
+    paths:
+      - '.github/workflows/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'sample_project/**'
+      - 'setup.py'
+      - 'pyproject.toml'
+      - 'tox.ini'
   pull_request:
 
 concurrency:
