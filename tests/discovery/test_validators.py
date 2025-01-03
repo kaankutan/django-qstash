@@ -4,10 +4,14 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 
+from django_qstash.discovery.utils import discover_tasks
 from django_qstash.discovery.validators import task_exists_validator
 
 
 class TestTaskExistsValidator(SimpleTestCase):
+    def setUp(self):
+        discover_tasks.cache_clear()
+
     def test_validates_existing_task(self):
         """Test that validator passes for existing tasks"""
         # Should not raise any exception

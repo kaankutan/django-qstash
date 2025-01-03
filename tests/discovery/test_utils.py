@@ -5,6 +5,7 @@ from django_qstash.discovery.utils import discover_tasks
 
 def test_discovers_basic_task():
     """Test that basic task discovery works"""
+    discover_tasks.cache_clear()
     tasks = discover_tasks()
     expected_tasks = [
         {

@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 from django.test import TestCase
-from django.test import override_settings
 
 from django_qstash.discovery.fields import TaskChoiceField
 from django_qstash.discovery.models import TaskField
+from django_qstash.discovery.utils import discover_tasks
 
 
 # @override_settings(INSTALLED_APPS=["tests.discovery"])
 class TestTaskChoiceField(TestCase):
+    def setUp(self):
+        discover_tasks.cache_clear()
+
     def test_field_initialization(self):
         """Test that the field initializes with correct choices and validators"""
         field = TaskChoiceField()
@@ -27,7 +30,7 @@ class TestTaskChoiceField(TestCase):
                 "Cleanup Task Results (django_qstash.results.tasks)",
             ),
         ]
-
+        print(field.choices, expected_choices)
         # Check choices are set correctly
         self.assertEqual(len(field.choices), len(expected_choices))
         self.assertEqual(
@@ -71,8 +74,11 @@ class TestTaskChoiceField(TestCase):
         )  # Default validator + custom validator
 
 
-@override_settings(INSTALLED_APPS=["tests.discovery"])
+# @override_settings(INSTALLED_APPS=["tests.discovery"])
 class TestTaskField(TestCase):
+    def setUp(self):
+        discover_tasks.cache_clear()
+
     def test_field_initialization(self):
         """Test that the field initializes with correct default max_length"""
         # Test default max_length
