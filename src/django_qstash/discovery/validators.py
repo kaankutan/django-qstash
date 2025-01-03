@@ -15,8 +15,8 @@ def task_exists_validator(task_name):
     Raises:
         ValidationError: If the task cannot be found
     """
-    tasks = discover_tasks()
-    available_tasks = [task[0] for task in tasks]
+    discover_tasks.cache_clear()
+    available_tasks = discover_tasks(locations_only=True)
 
     if task_name not in available_tasks:
         raise ValidationError(

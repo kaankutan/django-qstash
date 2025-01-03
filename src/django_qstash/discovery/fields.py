@@ -16,10 +16,10 @@ class TaskChoiceField(forms.ChoiceField):
         kwargs.pop("max_length", None)
 
         # Get tasks before calling parent to set choices
-        tasks = discover_tasks()
+        tasks = discover_tasks(locations_only=False)
 
         # Convert tasks to choices using (task_name, task_name) format
-        task_choices = [(task_value, task_label) for task_value, task_label in tasks]
+        task_choices = [(task["location"], task["field_label"]) for task in tasks]
 
         kwargs["choices"] = task_choices
         kwargs["validators"] = [task_exists_validator] + kwargs.get("validators", [])
@@ -30,9 +30,9 @@ class TaskChoiceField(forms.ChoiceField):
         Returns the actual task dot notation path for the selected value
         """
         if self.data:
-            tasks = discover_tasks()
+            tasks = discover_tasks(locations_only=False)
 
-            for task_value, task_label in tasks:
-                if task_label == self.data:
-                    return task_value
+            for task in tasks:
+                if task["field_label"] == self.data:
+                    return task["location"]
         return None

@@ -39,8 +39,12 @@ This allows us to:
       - [`.apply_async()` With Time Delay](#apply_async-with-time-delay)
     - [JSON-ready Arguments](#json-ready-arguments)
     - [Example Task](#example-task)
-  - [Configuration](#configuration)
+  - [Management Commands](#management-commands)
+  - [Development Usage](#development-usage)
+  - [Django Settings Configuration](#django-settings-configuration)
   - [Schedule Tasks (Optional)](#schedule-tasks-optional)
+    - [Installation](#installation-1)
+  - [Schedule a Task](#schedule-a-task)
   - [Store Task Results (Optional)](#store-task-results-optional)
     - [Clear Stale Results](#clear-stale-results)
   - [Definitions](#definitions)
@@ -129,7 +133,6 @@ def hello_world(name: str, age: int = None, activity: str = None):
         return
     print(f"Hello {name}! I see you're {activity} at {age} years old.")
 ```
-
 
 ### Regular Task Call
 Nothing special here. Just call the function like any other to verify it works.
@@ -227,32 +230,49 @@ math_add_task.apply_async(
 The `.delay()` method does not support a countdown parameter because it simply passes the arguments (*args, **kwargs) to the `apply_async()` method.
 
 
-## Configuration
+## Management Commands
+
+- `python manage.py available_tasks` to view all available tasks
+
+_Requires `django_qstash.schedules` installed._
+- `python manage.py task_schedules --list` see all schedules relate to the `DJANGO_QSTASH_DOMAIN`
+- `python manage.py task_schedules --sync` sync schedules based on the `DJANGO_QSTASH_DOMAIN` to store in the Django Admin.
+
+## Development Usage
+
+django-qstash requires a public domain to work (e.g. `https://djangoqstash.com`). There are many ways to do this, we recommend:
+
+- [Cloudflare Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) with a domain name you control.
+- [ngrok](https://ngrok.com/)
+
+Once you have a domain name, you can configure the `DJANGO_QSTASH_DOMAIN` setting in your Django settings.
+
+
+## Django Settings Configuration
 
 In Django settings, you can configure the following:
 
-`DJANGO_QSTASH_DOMAIN`: Must be a valid and publicly accessible domain. For example `https://djangoqstash.com`
+- `DJANGO_QSTASH_DOMAIN`: Must be a valid and publicly accessible domain. For example `https://djangoqstash.com`. Review [Development usage](#development-usage) for setting up a domain name during development.
 
-In development mode, we recommend using a tunnel like [Cloudflare Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) with a domain name you control. You can also consider [ngrok](https://ngrok.com/).
+- `DJANGO_QSTASH_WEBHOOK_PATH` (default:`/qstash/webhook/`): The path where QStash will send webhooks to your Django application.
 
-`DJANGO_QSTASH_WEBHOOK_PATH` (default:`/qstash/webhook/`): The path where QStash will send webhooks to your Django application.
+- `DJANGO_QSTASH_FORCE_HTTPS` (default:`True`): Whether to force HTTPS for the webhook.
 
-`DJANGO_QSTASH_FORCE_HTTPS` (default:`True`): Whether to force HTTPS for the webhook.
-
-`DJANGO_QSTASH_RESULT_TTL` (default:`604800`): A number of seconds after which task result data can be safely deleted. Defaults to 604800 seconds (7 days or 7 * 24 * 60 * 60).
-
+- `DJANGO_QSTASH_RESULT_TTL` (default:`604800`): A number of seconds after which task result data can be safely deleted. Defaults to 604800 seconds (7 days or 7 * 24 * 60 * 60).
 
 
 ## Schedule Tasks (Optional)
 
-Schedules are a way to schedule tasks to run at a specific time via Cron schedules. They are created via the `django_qstash.schedules` app.
+The `django_qstash.schedules` app schedules tasks using Upstash [QStash Schedules](https://upstash.com/docs/qstash/features/schedules) and the django-qstash `@shared_task` decorator.
+
+### Installation
 
 Update your `INSTALLED_APPS` setting to include `django_qstash.schedules`.
 
 ```python
 INSTALLED_APPS = [
     # ...
-    "django_qstash",
+    "django_qstash",  # required
     "django_qstash.schedules",
     # ...
 ]
@@ -263,28 +283,42 @@ Run migrations:
 python manage.py migrate django_qstash_schedules
 ```
 
-Schedule management command:
 
-`python manage.py task_schedules --list` see all schedules relate to the `DJANGO_QSTASH_DOMAIN`
+## Schedule a Task
 
-`python manage.py task_schedules --sync` sync schedules based on the `DJANGO_QSTASH_DOMAIN` to store in the Django Admin.
+Tasks must exist before you can schedule them. Review [Define a Task](#define-a-task) for more information.
 
-Two ways to create a schedule:
-1. In the Django Admin (`/admin/django_qstash_schedules/taskschedule/add/`)
-2. In the Django shell:
+Here's how you can schedule a task:
+- Django Admin (`/admin/django_qstash_schedules/taskschedule/add/`)
+- Django shell (`python manage.py shell`)
+
+
+
 
 ```python
 from django_qstash.schedules.models import TaskSchedule
+from django_qstash.discovery.utils import discover_tasks
+
+all_available_tasks = discover_tasks(paths_only=True)
+
+desired_task = "django_qstash.results.clear_stale_results_task"
+# or desired_task = "example_app.tasks.my_task"
+
+task_to_use = desired_task
+if desired_task not in available_task_locations:
+    task_to_use = available_task_locations[0]
+
+print(f"Using task: {task_to_use}")
 
 TaskSchedule.objects.create(
     name="My Schedule",
     cron="0 0 * * *",
-    task_name="example_app.tasks.my_task",
+    task_name=task_to_use,
     args=["arg1", "arg2"],
     kwargs={"kwarg1": "value1", "kwarg2": "value2"},
 )
 ```
-- `example_app.tasks.my_task` is an example task that `django_qstash` can find (see above)
+- `django_qstash.results.clear_stale_results_task` is a built-in task that `django_qstash.results` provides
 - `args` and `kwargs` are the arguments to pass to the task
 - `cron` is the cron schedule to run the task. Use [contrab.guru](https://crontab.guru/) for writing the cron format.
 

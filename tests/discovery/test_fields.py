@@ -7,7 +7,7 @@ from django_qstash.discovery.fields import TaskChoiceField
 from django_qstash.discovery.models import TaskField
 
 
-@override_settings(INSTALLED_APPS=["tests.discovery"])
+# @override_settings(INSTALLED_APPS=["tests.discovery"])
 class TestTaskChoiceField(TestCase):
     def test_field_initialization(self):
         """Test that the field initializes with correct choices and validators"""
@@ -22,13 +22,17 @@ class TestTaskChoiceField(TestCase):
                 "tests.discovery.tasks.debug_task",
                 "tests.discovery.tasks.debug_task",
             ),
+            (
+                "django_qstash.results.tasks.clear_stale_results_task",
+                "Cleanup Task Results (django_qstash.results.tasks)",
+            ),
         ]
 
         # Check choices are set correctly
         self.assertEqual(len(field.choices), len(expected_choices))
         self.assertEqual(
-            [choice[1] for choice in field.choices],
-            [choice[1] for choice in expected_choices],
+            sorted([choice[1] for choice in field.choices]),
+            sorted([choice[1] for choice in expected_choices]),
         )
 
         # Check validator is present

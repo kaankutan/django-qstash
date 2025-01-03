@@ -19,7 +19,7 @@ DJANGO_QSTASH_DISCOVER_INCLUDE_SETTINGS_DIR = getattr(
 
 
 @lru_cache(maxsize=None)
-def discover_tasks() -> list[tuple[str, str]]:
+def discover_tasks(locations_only: bool = False) -> list[str] | list[dict]:
     """
     Automatically discover tasks in Django apps and return them as a list of tuples.
     Each tuple contains (dot_notation_path, task_name).
@@ -72,13 +72,21 @@ def discover_tasks() -> list[tuple[str, str]]:
                         label = value
                     else:
                         label = f"{attr.name} ({package}.tasks)"
-                    discovered_tasks.append((value, label))
+                    discovered_tasks.append(
+                        {
+                            "name": attr.name,
+                            "field_label": label,
+                            "location": f"{package}.tasks.{attr_name}",
+                        }
+                    )
         except Exception as e:
             warnings.warn(
                 f"Failed to import tasks from {package}: {str(e)}",
                 RuntimeWarning,
                 stacklevel=2,
             )
+    if locations_only:
+        return [x["location"] for x in discovered_tasks]
     return discovered_tasks
 
 
