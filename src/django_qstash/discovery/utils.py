@@ -71,7 +71,7 @@ def discover_tasks() -> list[tuple[str, str]]:
                     if attr.name == attr_name:
                         label = value
                     else:
-                        label = f"{attr.name} ({value})"
+                        label = f"{attr.name} ({package}.tasks)"
                     discovered_tasks.append((value, label))
         except Exception as e:
             warnings.warn(

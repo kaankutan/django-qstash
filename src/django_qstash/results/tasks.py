@@ -14,7 +14,7 @@ DJANGO_QSTASH_RESULT_TTL = getattr(settings, "DJANGO_QSTASH_RESULT_TTL", 604800)
 logger = logging.getLogger(__name__)
 
 
-@shared_task
+@shared_task(name="Cleanup Task Results")
 def clear_stale_results_task(
     since=None, stdout=None, user_confirm=False, *args, **options
 ):

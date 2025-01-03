@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.8] - 2025-01-03
+
+### Added
+- Added `clear_stale_results_task` task to cleanup old task results
+- Updated `clear_stale_results` management command to use `clear_stale_results_task` with background trigger
+- Moved `shared_task` and `QStashTask` to `django_qstash.app.decorators` and `django_qstash.app.base` respectively
+- Updated tests for above changes
 
 ## [0.0.7] - 2025-01-02
 
