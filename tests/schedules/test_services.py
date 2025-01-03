@@ -17,6 +17,9 @@ def test_sync_task_schedule_instance_to_qstash(task_schedule):
     with patch(
         "django_qstash.schedules.services.qstash_client.schedule.create"
     ) as mock_create:
+        # Configure mock to return a schedule ID
+        mock_create.return_value = "test-schedule-id"
+
         result = sync_task_schedule_instance_to_qstash(task_schedule)
 
         mock_create.assert_called_once()  # Verify the mock was called
