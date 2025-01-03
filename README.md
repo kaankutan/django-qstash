@@ -40,7 +40,8 @@ This allows us to:
     - [JSON-ready Arguments](#json-ready-arguments)
     - [Example Task](#example-task)
   - [Configuration](#configuration)
-  - [Storing Task Results (Optional)](#storing-task-results-optional)
+  - [Schedule Tasks (Optional)](#schedule-tasks-optional)
+  - [Store Task Results (Optional)](#store-task-results-optional)
     - [Clear Stale Results](#clear-stale-results)
   - [Definitions](#definitions)
   - [Motivation](#motivation)
@@ -60,12 +61,13 @@ INSTALLED_APPS = [
     ##...
     "django_qstash",
     "django_qstash.results",
+    "django_qstash.schedules",
     ##...
 ]
 ```
 - `django_qstash` Includes the `@shared_task` decorator and webhook view
 - `django_qstash.results` (Optional): Store task results in Django DB
-
+- `django_qstash.schedules` (Optional): Use QStash Schedules to run your `django_qstash` tasks. Out of the box support for _django_qstash_ `@shared_task`. Schedule tasks using _cron_ (e.g. `0 0 * * *`) format which is required based on [QStash Schedules](https://upstash.com/docs/qstash/features/schedules). use [contrab.guru](https://crontab.guru/) for writing the cron format.
 
 ### Configure Webhook URL
 
@@ -240,7 +242,55 @@ In development mode, we recommend using a tunnel like [Cloudflare Tunnels](https
 `DJANGO_QSTASH_RESULT_TTL` (default:`604800`): A number of seconds after which task result data can be safely deleted. Defaults to 604800 seconds (7 days or 7 * 24 * 60 * 60).
 
 
-## Storing Task Results (Optional)
+
+## Schedule Tasks (Optional)
+
+Schedules are a way to schedule tasks to run at a specific time via Cron schedules. They are created via the `django_qstash.schedules` app.
+
+Update your `INSTALLED_APPS` setting to include `django_qstash.schedules`.
+
+```python
+INSTALLED_APPS = [
+    # ...
+    "django_qstash",
+    "django_qstash.schedules",
+    # ...
+]
+```
+
+Run migrations:
+```bash
+python manage.py migrate django_qstash_schedules
+```
+
+Schedule management command:
+
+`python manage.py task_schedules --list` see all schedules relate to the `DJANGO_QSTASH_DOMAIN`
+
+`python manage.py task_schedules --sync` sync schedules based on the `DJANGO_QSTASH_DOMAIN` to store in the Django Admin.
+
+Two ways to create a schedule:
+1. In the Django Admin (`/admin/django_qstash_schedules/taskschedule/add/`)
+2. In the Django shell:
+
+```python
+from django_qstash.schedules.models import TaskSchedule
+
+TaskSchedule.objects.create(
+    name="My Schedule",
+    cron="0 0 * * *",
+    task_name="example_app.tasks.my_task",
+    args=["arg1", "arg2"],
+    kwargs={"kwarg1": "value1", "kwarg2": "value2"},
+)
+```
+- `example_app.tasks.my_task` is an example task that `django_qstash` can find (see above)
+- `args` and `kwargs` are the arguments to pass to the task
+- `cron` is the cron schedule to run the task. Use [contrab.guru](https://crontab.guru/) for writing the cron format.
+
+
+
+## Store Task Results (Optional)
 
 In `django_qstash.results.models` we have the `TaskResult` model class that can be used to track async task results. These entries are created via webhooks.
 
@@ -249,6 +299,7 @@ To install it, just add `django_qstash.results` to your `INSTALLED_APPS` setting
 ```python
 INSTALLED_APPS = [
     # ...
+    "django_qstash",
     "django_qstash.results",
     # ...
 ]
@@ -256,14 +307,14 @@ INSTALLED_APPS = [
 
 Run migrations:
 ```bash
-python manage.py migrate
+python manage.py migrate django_qstash_results
 ```
 
 ### Clear Stale Results
 
 We recommend purging the `TaskResult` model after a certain amount of time.
 ```bash
-python manage.py clear_stale_results
+python manage.py clear_stale_results --since 604800
 ```
 Args:
 - `--since` is the number of seconds ago to clear results for. Defaults to 604800 seconds (7 days or the `DJANGO_QSTASH_RESULT_TTL` setting).
