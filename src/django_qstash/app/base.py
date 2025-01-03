@@ -118,26 +118,3 @@ class AsyncResult:
     @property
     def id(self) -> str:
         return self.task_id
-
-
-def shared_task(
-    func: Callable | None = None,
-    name: str | None = None,
-    deduplicated: bool = False,
-    **options: dict[str, Any],
-) -> QStashTask:
-    """
-    Decorator that mimics Celery's shared_task
-
-    Can be used as:
-        @shared_task
-        def my_task():
-            pass
-
-        @shared_task(name="custom_name", deduplicated=True)
-        def my_task():
-            pass
-    """
-    if func is not None:
-        return QStashTask(func, name=name, deduplicated=deduplicated, **options)
-    return lambda f: QStashTask(f, name=name, deduplicated=deduplicated, **options)
