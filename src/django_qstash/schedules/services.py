@@ -20,7 +20,9 @@ def sync_task_schedule_instance_to_qstash(instance: TaskSchedule) -> TaskSchedul
     and updates existing schedules when active.
     """
     data = format_task_schedule_for_qstash(instance)
-    qstash_client.schedule.create(**data)
+    schedule_id = qstash_client.schedule.create(**data)
+    if not instance.schedule_id:
+        TaskSchedule.objects.filter(id=instance.id).update(schedule_id=schedule_id)
 
     sync_state_changes(instance)
 

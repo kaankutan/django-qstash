@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [0.0.9] - 2025-01-03
+
+- Fixes issue with schedule_id not being set on TaskSchedule model
+
 ## [0.0.8] - 2025-01-03
 
 ### Added
