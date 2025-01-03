@@ -32,7 +32,7 @@ def discover_tasks() -> list[tuple[str, str]]:
             ('other_app.tasks.custom_task', 'special_name')
         ]
     """
-    from django_qstash.tasks import QStashTask
+    from django_qstash.app import QStashTask
 
     discovered_tasks = []
     packages = []
