@@ -16,7 +16,7 @@ class TestTaskChoiceField(TestCase):
         expected_choices = [
             (
                 "tests.discovery.tasks.custom_name_task",
-                "Custom Name Task (tests.discovery.tasks.custom_name_task)",
+                "Custom Name Task (tests.discovery.tasks)",
             ),
             (
                 "tests.discovery.tasks.debug_task",
@@ -39,7 +39,7 @@ class TestTaskChoiceField(TestCase):
         field = TaskChoiceField()
 
         # Set value using bound field data
-        field.data = "Custom Name Task (tests.discovery.tasks.custom_name_task)"
+        field.data = "Custom Name Task (tests.discovery.tasks)"
 
         # Should return the actual task path
         self.assertEqual(field.get_task(), "tests.discovery.tasks.custom_name_task")
