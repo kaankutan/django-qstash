@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.10] - 2025-01-03
+
+### Added
+- New task discovery to include task name and field label
+- `available_tasks` management command to view all available tasks
+- `TaskChoiceField` to form fields to select available tasks
+- New tests
 
 ## [0.0.9] - 2025-01-03
 
@@ -68,7 +75,9 @@ No changes, testing bump2version.
 - Tox configuration for multiple Python and Django versions
 - Documentation and examples
 
-[0.0.9]: https://github.com/jmitchel3/django-qstash/compare/v0.0.9...HEAD
+
+[0.0.10]: https://github.com/jmitchel3/django-qstash/compare/v0.0.10...HEAD
+[0.0.9]: https://github.com/jmitchel3/django-qstash/compare/v0.0.9...v0.0.10
 [0.0.8]: https://github.com/jmitchel3/django-qstash/compare/v0.0.8...v0.0.9
 [0.0.7]: https://github.com/jmitchel3/django-qstash/compare/v0.0.7...v0.0.8
 [0.0.6]: https://github.com/jmitchel3/django-qstash/compare/v0.0.6...v0.0.7
