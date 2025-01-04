@@ -50,18 +50,22 @@ This allows us to:
   - [Usage](#usage)
     - [Define a Task](#define-a-task)
     - [Regular Task Call](#regular-task-call)
-    - [Async Task](#async-task)
+    - [Background Task](#background-task)
       - [`.delay()`](#delay)
       - [`.apply_async()`](#apply_async)
       - [`.apply_async()` With Time Delay](#apply_async-with-time-delay)
-    - [JSON-ready Arguments](#json-ready-arguments)
+    - [Arguments Must be JSON-ready](#arguments-must-be-json-ready)
     - [Example Task](#example-task)
   - [Management Commands](#management-commands)
-  - [Development Usage](#development-usage)
+  - [Public Domain In Development](#public-domain-in-development)
   - [Django Settings Configuration](#django-settings-configuration)
+    - [`DJANGO_QSTASH_DOMAIN`](#django_qstash_domain)
+    - [`DJANGO_QSTASH_WEBHOOK_PATH`](#django_qstash_webhook_path)
+    - [`DJANGO_QSTASH_FORCE_HTTPS`](#django_qstash_force_https)
+    - [Example Django Settings](#example-django-settings)
   - [Schedule Tasks (Optional)](#schedule-tasks-optional)
     - [Installation](#installation-1)
-  - [Schedule a Task](#schedule-a-task)
+    - [Schedule a Task](#schedule-a-task)
   - [Store Task Results (Optional)](#store-task-results-optional)
     - [Clear Stale Results](#clear-stale-results)
   - [Definitions](#definitions)
@@ -132,7 +136,7 @@ There is a sample project in [sample_project/](sample_project/) that shows how a
 
 ## Usage
 
-Django-QStash revolves around the `stashed_task` decorator. The goal is to be a drop-in replacement for Celery's `stashed_task` decorator.
+Django-QStash revolves around the `stashed_task` decorator. The goal is to be a drop-in replacement for Celery's `shared_task` decorator.
 
 Here's how it works:
 - Define a Task
@@ -140,6 +144,8 @@ Here's how it works:
 
 ### Define a Task
 ```python
+# from celery import shared_task
+from django_qstash import shared_task
 from django_qstash import stashed_task
 
 
@@ -149,7 +155,18 @@ def hello_world(name: str, age: int = None, activity: str = None):
         print(f"Hello {name}! I see you're {activity}.")
         return
     print(f"Hello {name}! I see you're {activity} at {age} years old.")
+
+
+@shared_task
+def hello_world_redux(name: str, age: int = None, activity: str = None):
+    if age is None:
+        print(f"Hello {name}! I see you're {activity}.")
+        return
+    print(f"Hello {name}! I see you're {activity} at {age} years old.")
 ```
+
+- `hello_world` and `hello_world_redux` work the same with django-qstash.
+- If you use Celery's `@shared_task` instead, Celery would handle only `hello_world_redux` and django-qstash would handle only `hello_world`.
 
 ### Regular Task Call
 Nothing special here. Just call the function like any other to verify it works.
@@ -159,9 +176,11 @@ Nothing special here. Just call the function like any other to verify it works.
 hello_world("Tony Stark", age=40, activity="building in a cave with a box of scraps.")
 ```
 
-### Async Task
+### Background Task
 
-Using `.delay()` or `.apply_async()` is how you call an async task. This is modeled after Celery and it works as you'd expect.
+Using `.delay()` or `.apply_async()` is how you trigger a background task. These background tasks are actually setting up a QStash message that will be delivered via webhook to your Django application. django-qstash handles the webhook and the message delivery assuming installed correctly.
+
+This functionality is modeled after Celery and it works as you'd expect.
 
 
 #### `.delay()`
@@ -194,10 +213,11 @@ hello_world.apply_async(
 )
 ```
 
-### JSON-ready Arguments
+### Arguments Must be JSON-ready
 
-Each argument needs to be _JSON_ serializable. The way you find out:
+Arguments to django-qstash managed functions must be _JSON_ serializable.
 
+The way you find out:
 ```python
 import json
 
@@ -208,6 +228,11 @@ data = {
 print(json.dumps(data))
 # no errors, you're good to go.
 ```
+If you have `errors` you'll need to fix them. Here's a few common errors you might see:
+
+- Using a Django queryset directly as an argument
+- Using a Django model instance directly as an argument
+- Using a datetime object directly as an argument (e.g. `datetime.datetime` or `datetime.date`) instead of a timestamp or date string (e.g. `datetime.datetime.now().timestamp()` or `datetime.datetime.now.strftime("%Y-%m-%d")`)
 
 ### Example Task
 
@@ -252,38 +277,83 @@ The `.delay()` method does not support a countdown parameter because it simply p
 
 ## Management Commands
 
-- `python manage.py available_tasks` to view all available tasks
+- `python manage.py available_tasks` to view all available tasks found by django-qstash. Unlike Celery, django-qstash does not assign tasks to a specific Celery app (e.g. `app = Celery()`).
 
 _Requires `django_qstash.schedules` installed._
 - `python manage.py task_schedules --list` see all schedules relate to the `DJANGO_QSTASH_DOMAIN`
 - `python manage.py task_schedules --sync` sync schedules based on the `DJANGO_QSTASH_DOMAIN` to store in the Django Admin.
 
-## Development Usage
+## Public Domain In Development
 
-django-qstash requires a public domain to work (e.g. `https://djangoqstash.com`). There are many ways to do this, we recommend:
+django-qstash _requires_ a publicly accessible domain to work (e.g. `https://djangoqstash.com`). There are many ways to do this, we recommend:
 
 - [Cloudflare Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) with a domain name you control.
 - [ngrok](https://ngrok.com/)
 
 Once you have a domain name, you can configure the `DJANGO_QSTASH_DOMAIN` setting in your Django settings.
 
-
 ## Django Settings Configuration
 
-In Django settings, you can configure the following:
+Various options are available to configure django-qstash.
 
-- `DJANGO_QSTASH_DOMAIN`: Must be a valid and publicly accessible domain. For example `https://djangoqstash.com`. Review [Development usage](#development-usage) for setting up a domain name during development.
+### `DJANGO_QSTASH_DOMAIN`
+- Required: Yes
+- Default:`None`
+- Description: Must be a valid and publicly accessible domain. For example `https://djangoqstash.com`. Review [Development usage](#development-usage) for setting up a domain name during development.
 
-- `DJANGO_QSTASH_WEBHOOK_PATH` (default:`/qstash/webhook/`): The path where QStash will send webhooks to your Django application.
+### `DJANGO_QSTASH_WEBHOOK_PATH`
+- Required: Yes
+- Default:`/qstash/webhook/`
+- Description: The path where QStash will send webhooks to your Django application.
 
-- `DJANGO_QSTASH_FORCE_HTTPS` (default:`True`): Whether to force HTTPS for the webhook.
+### `DJANGO_QSTASH_FORCE_HTTPS`
+- Required: No
+- Default: `True`
+- Description: Whether to force HTTPS for the webhook.
 
-- `DJANGO_QSTASH_RESULT_TTL` (default:`604800`): A number of seconds after which task result data can be safely deleted. Defaults to 604800 seconds (7 days or 7 * 24 * 60 * 60).
+###`DJANGO_QSTASH_RESULT_TTL`
+- Required: No
+- Default:`604800`
+- Description: A number of seconds after which task result data can be safely deleted. Defaults to 604800 seconds (7 days or 7 * 24 * 60 * 60).
+
+
+### Example Django Settings
+
+For a complete example, review [sample_project/settings.py](sample_project/settings.py) where [python-decouple](https://github.com/henriquebastos/python-decouple) is used to set the environment variables via the `.env` file or system environment variables (for production use).
+
+Using `os.environ`:
+```python
+import os
+
+###########################
+# django settings
+###########################
+DJANGO_DEBUG = str(os.environ.get("DJANGO_DEBUG")) == "1"
+DJANGO_SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+ALLOWED_HOSTS = [os.environ.get("ALLOWED_HOST")]
+CSRF_TRUSTED_ORIGINS = [os.environ.get("CSRF_TRUSTED_ORIGIN")]
+###########################
+# qstash-py settings
+###########################
+QSTASH_TOKEN = os.environ.get("QSTASH_TOKEN")
+QSTASH_CURRENT_SIGNING_KEY = os.environ.get("QSTASH_CURRENT_SIGNING_KEY")
+QSTASH_NEXT_SIGNING_KEY = os.environ.get("QSTASH_NEXT_SIGNING_KEY")
+
+###########################
+# django_qstash settings
+###########################
+DJANGO_QSTASH_DOMAIN = os.environ.get("DJANGO_QSTASH_DOMAIN")
+DJANGO_QSTASH_WEBHOOK_PATH = os.environ.get("DJANGO_QSTASH_WEBHOOK_PATH")
+DJANGO_QSTASH_FORCE_HTTPS = True
+DJANGO_QSTASH_RESULT_TTL = 604800
+```
 
 
 ## Schedule Tasks (Optional)
 
-The `django_qstash.schedules` app schedules tasks using Upstash [QStash Schedules](https://upstash.com/docs/qstash/features/schedules) and the django-qstash `@stashed_task` decorator.
+Run background tasks on a CRON schedule.
+
+The `django_qstash.schedules` app schedules tasks using Upstash [QStash Schedules](https://upstash.com/docs/qstash/features/schedules) via `@shared_task` or `@stashed_task` decorators along with the `TaskSchedule` model.
 
 ### Installation
 
@@ -303,17 +373,13 @@ Run migrations:
 python manage.py migrate django_qstash_schedules
 ```
 
-
-## Schedule a Task
+### Schedule a Task
 
 Tasks must exist before you can schedule them. Review [Define a Task](#define-a-task) for more information.
 
 Here's how you can schedule a task:
 - Django Admin (`/admin/django_qstash_schedules/taskschedule/add/`)
 - Django shell (`python manage.py shell`)
-
-
-
 
 ```python
 from django_qstash.schedules.models import TaskSchedule
@@ -343,10 +409,11 @@ TaskSchedule.objects.create(
 - `cron` is the cron schedule to run the task. Use [contrab.guru](https://crontab.guru/) for writing the cron format.
 
 
-
 ## Store Task Results (Optional)
 
-In `django_qstash.results.models` we have the `TaskResult` model class that can be used to track async task results. These entries are created via webhooks.
+Retain the results of background tasks in the database with clear-out functionality.
+
+In `django_qstash.results.models` we have the `TaskResult` model class that can be used to track async task results. These entries are created via the django-qstash webhook view handler (`qstash_webhook_view`).
 
 To install it, just add `django_qstash.results` to your `INSTALLED_APPS` setting.
 
@@ -363,6 +430,12 @@ Run migrations:
 ```bash
 python manage.py migrate django_qstash_results
 ```
+
+Key configuration:
+
+- [DJANGO_QSTASH_WEBHOOK_PATH](#django-settings-configuration)
+- [DJANGO_QSTASH_DOMAIN](#django-settings-configuration)
+- [DJANGO_QSTASH_RESULT_TTL](#django-settings-configuration)
 
 ### Clear Stale Results
 
