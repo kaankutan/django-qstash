@@ -5,15 +5,15 @@ from unittest.mock import patch
 
 import pytest
 
-from django_qstash.app import shared_task
+from django_qstash.app import stashed_task
 
 
-@shared_task
+@stashed_task
 def sample_task(x, y):
     return x + y
 
 
-@shared_task(name="custom_task", deduplicated=True)
+@stashed_task(name="custom_task", deduplicated=True)
 def sample_task_with_options(x, y):
     return x * y
 

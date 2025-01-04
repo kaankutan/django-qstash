@@ -26,11 +26,14 @@ class TestTaskChoiceField(TestCase):
                 "tests.discovery.tasks.debug_task",
             ),
             (
+                "tests.discovery.tasks.replace_celery_decorator_task",
+                "tests.discovery.tasks.replace_celery_decorator_task",
+            ),
+            (
                 "django_qstash.results.tasks.clear_stale_results_task",
                 "Cleanup Task Results (django_qstash.results.tasks)",
             ),
         ]
-        print(field.choices, expected_choices)
         # Check choices are set correctly
         self.assertEqual(len(field.choices), len(expected_choices))
         self.assertEqual(

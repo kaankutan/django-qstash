@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from django_qstash import shared_task
+from django_qstash import stashed_task as shared_task
 
 logger = logging.getLogger(__name__)
 

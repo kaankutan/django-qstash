@@ -4,16 +4,32 @@
 
 _django-qstash_ is a drop-in replacement for Celery's `shared_task`.
 
-To do this, we use:
+
+## How it works
+
+In `tasks.py` in your apps:
+
+```python
+from django_qstash import shared_task
+
+
+@shared_task
+def my_task():
+    pass
+```
+> To use Celery too, you can use `@stashed_task` instead of `@shared_task` more below.
+
+To do this we need:
 
 - [Upstash QStash](https://upstash.com/docs/qstash/overall/getstarted)
-- A single public _webhook_ to call `@shared_task` functions automatically
+- A single public _webhook_ to call `@stashed_task` functions automatically
 
 This allows us to:
 
+- Nearly identical usage to Celery's `@shared_task` with far less configuration and overhead
 - Focus just on Django
-- Drop Celery
-- Truly scale Django to zero
+- Drop Celery completely, scale it down, or use it as normal. django-qstash can work hand-in-hand with Celery
+- Unlock true serverless and scale-to-zero for Django
 - Run background tasks through webhooks
 - Cut costs
 - Trigger GitHub Actions Workflows or GitLab CI/CD pipelines for handling other kinds of background tasks based on our project's code.
@@ -22,6 +38,7 @@ This allows us to:
 ## Table of Contents
 
 - [django-qstash](#django-qstash)
+  - [How it works](#how-it-works)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
     - [Using Pip](#using-pip)
@@ -69,9 +86,9 @@ INSTALLED_APPS = [
     ##...
 ]
 ```
-- `django_qstash` Includes the `@shared_task` decorator and webhook view
+- `django_qstash` Includes the `@shared_task` and `@stashed_task` decorators and webhook view
 - `django_qstash.results` (Optional): Store task results in Django DB
-- `django_qstash.schedules` (Optional): Use QStash Schedules to run your `django_qstash` tasks. Out of the box support for _django_qstash_ `@shared_task`. Schedule tasks using _cron_ (e.g. `0 0 * * *`) format which is required based on [QStash Schedules](https://upstash.com/docs/qstash/features/schedules). use [contrab.guru](https://crontab.guru/) for writing the cron format.
+- `django_qstash.schedules` (Optional): Use QStash Schedules to run your `django_qstash` tasks. Out of the box support for _django_qstash_ `@stashed_task`. Schedule tasks using _cron_ (e.g. `0 0 * * *`) format which is required based on [QStash Schedules](https://upstash.com/docs/qstash/features/schedules). use [contrab.guru](https://crontab.guru/) for writing the cron format.
 
 ### Configure Webhook URL
 
@@ -115,7 +132,7 @@ There is a sample project in [sample_project/](sample_project/) that shows how a
 
 ## Usage
 
-Django-QStash revolves around the `shared_task` decorator. The goal is to be a drop-in replacement for Celery's `shared_task` decorator.
+Django-QStash revolves around the `stashed_task` decorator. The goal is to be a drop-in replacement for Celery's `stashed_task` decorator.
 
 Here's how it works:
 - Define a Task
@@ -123,10 +140,10 @@ Here's how it works:
 
 ### Define a Task
 ```python
-from django_qstash import shared_task
+from django_qstash import stashed_task
 
 
-@shared_task
+@stashed_task
 def hello_world(name: str, age: int = None, activity: str = None):
     if age is None:
         print(f"Hello {name}! I see you're {activity}.")
@@ -196,10 +213,13 @@ print(json.dumps(data))
 
 ```python
 # from celery import shared_task
-from django_qstash import shared_task
+# becomes
+# from django_qstash import shared_task
+# or
+from django_qstash import stashed_task
 
 
-@shared_task
+@stashed_task
 def math_add_task(a, b, save_to_file=False, *args, **kwargs):
     logger.info(f"Adding {a} and {b}")
     if save_to_file:
@@ -263,7 +283,7 @@ In Django settings, you can configure the following:
 
 ## Schedule Tasks (Optional)
 
-The `django_qstash.schedules` app schedules tasks using Upstash [QStash Schedules](https://upstash.com/docs/qstash/features/schedules) and the django-qstash `@shared_task` decorator.
+The `django_qstash.schedules` app schedules tasks using Upstash [QStash Schedules](https://upstash.com/docs/qstash/features/schedules) and the django-qstash `@stashed_task` decorator.
 
 ### Installation
 

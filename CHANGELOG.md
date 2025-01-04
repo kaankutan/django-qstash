@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.11] - 2025-01-04
+
+### Added
+- `shared_task` decorator to enable Celery compatibility
+
+### Changed
+- django-qstash's `shared_task` decorator (`django_qstash.app.decorators.shared_task`) is now alternative name for `stashed_task`
+
 ## [0.0.10] - 2025-01-03
 
 ### Added

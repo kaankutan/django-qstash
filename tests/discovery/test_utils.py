@@ -23,6 +23,11 @@ def test_discovers_basic_task():
             "field_label": "Cleanup Task Results (django_qstash.results.tasks)",
             "location": "django_qstash.results.tasks.clear_stale_results_task",
         },
+        {
+            "name": "replace_celery_decorator_task",
+            "field_label": "tests.discovery.tasks.replace_celery_decorator_task",
+            "location": "tests.discovery.tasks.replace_celery_decorator_task",
+        },
     ]
     assert len(tasks) == len(expected_tasks)
     tasks_set = {tuple(sorted(t.items())) for t in tasks}
