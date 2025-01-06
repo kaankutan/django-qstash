@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.12] - 2025-01-06
+
+### Added
+- Better tracking support and error handling for `TaskResult` model
+  - added the `function_path` field
+  - Updated webhook exception handling to store errors in running tasks
+- Created dedicated task to clear error results
+- Added Cron string validation for `TaskScheduleForm`
+- Improved tests
+
 ## [0.0.11] - 2025-01-04
 
 ### Added
@@ -84,7 +94,8 @@ No changes, testing bump2version.
 - Documentation and examples
 
 
-[0.0.11]: https://github.com/jmitchel3/django-qstash/compare/v0.0.11...HEAD
+[0.0.12]: https://github.com/jmitchel3/django-qstash/compare/v0.0.12...HEAD
+[0.0.11]: https://github.com/jmitchel3/django-qstash/compare/v0.0.11...v0.0.12
 [0.0.10]: https://github.com/jmitchel3/django-qstash/compare/v0.0.10...v0.0.11
 [0.0.9]: https://github.com/jmitchel3/django-qstash/compare/v0.0.9...v0.0.10
 [0.0.8]: https://github.com/jmitchel3/django-qstash/compare/v0.0.8...v0.0.9
