@@ -9,6 +9,8 @@ from django.conf import settings
 from django.http import HttpRequest
 from qstash import Receiver
 
+from django_qstash.db.models import TaskStatus
+
 from . import utils
 from .exceptions import PayloadError
 from .exceptions import SignatureError
@@ -90,7 +92,9 @@ class QStashWebhook:
 
     def handle_request(self, request: HttpRequest) -> tuple[dict, int]:
         """Process webhook request and return response data and status code."""
-        payload = None  # Initialize payload as None
+        payload = None
+        task_id = request.headers.get("Upstash-Message-Id")
+
         try:
             body = request.body.decode()
             self.verify_signature(
@@ -101,14 +105,14 @@ class QStashWebhook:
 
             payload = self.parse_payload(body)
             result = self.execute_task(payload)
-
             store_task_result(
-                task_id=request.headers.get("Upstash-Message-Id"),
+                task_id=task_id,
                 task_name=payload.task_name,
-                status="SUCCESS",
+                status=TaskStatus.SUCCESS,
                 result=result,
                 args=payload.args,
                 kwargs=payload.kwargs,
+                function_path=payload.function_path,
             )
 
             return {
@@ -125,16 +129,37 @@ class QStashWebhook:
                 "error": str(e),
                 "task_name": getattr(payload, "task_name", None),
             }, 400
+
         except TaskError as e:
             logger.exception("Task execution error: %s", str(e))
+            store_task_result(
+                task_id=task_id,
+                task_name=payload.task_name,
+                status=TaskStatus.EXECUTION_ERROR,
+                traceback=str(e),
+                args=payload.args,
+                kwargs=payload.kwargs,
+                function_path=payload.function_path,
+            )
             return {
                 "status": "error",
                 "error_type": e.__class__.__name__,
                 "error": str(e),
-                "task_name": payload.task_name if payload else None,
-            }, 500
+                "task_name": payload.task_name,
+            }, 422
+
         except Exception as e:
             logger.exception("Unexpected error in webhook handler: %s", str(e))
+            if payload:  # Store unexpected errors only if payload was parsed
+                store_task_result(
+                    task_id=task_id,
+                    task_name=payload.task_name,
+                    status=TaskStatus.INTERNAL_ERROR,
+                    traceback=str(e),
+                    args=payload.args,
+                    kwargs=payload.kwargs,
+                    function_path=payload.function_path,
+                )
             return {
                 "status": "error",
                 "error_type": "InternalServerError",

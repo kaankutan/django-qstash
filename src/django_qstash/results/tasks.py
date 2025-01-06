@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from django_qstash import stashed_task
+from django_qstash.db.models import TaskStatus
 
 DJANGO_QSTASH_RESULT_TTL = getattr(settings, "DJANGO_QSTASH_RESULT_TTL", 604800)
 
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 @stashed_task(name="Cleanup Task Results")
 def clear_stale_results_task(
-    since=None, stdout=None, user_confirm=False, *args, **options
+    since=None, stdout=None, user_confirm=False, exclude_errors=True, *args, **options
 ):
     delta_seconds = since or DJANGO_QSTASH_RESULT_TTL
     cutoff_date = timezone.now() - timedelta(seconds=delta_seconds)
@@ -30,6 +31,14 @@ def clear_stale_results_task(
         logger.exception(msg)
         raise e
     qs_to_delete = TaskResult.objects.filter(date_done__lt=cutoff_date)
+    if exclude_errors:
+        qs_to_delete = qs_to_delete.exclude(
+            status__in=[
+                TaskStatus.EXECUTION_ERROR,
+                TaskStatus.INTERNAL_ERROR,
+                TaskStatus.OTHER_ERROR,
+            ]
+        )
 
     if user_confirm:
         user_input = input("Are you sure? (Y/n): ")
@@ -65,3 +74,12 @@ def clear_stale_results_task(
             stdout.write(msg)
         logger.exception(msg)
         raise e
+
+
+@stashed_task(name="Clear Task Error Results")
+def clear_task_errors_task(
+    since=None, stdout=None, user_confirm=False, *args, **options
+):
+    clear_stale_results_task(
+        since=since, stdout=stdout, user_confirm=user_confirm, exclude_errors=False
+    )

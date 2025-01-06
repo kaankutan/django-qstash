@@ -17,5 +17,8 @@ class TaskResultAdmin(admin.ModelAdmin):
         "kwargs",
         "task_id",
         "date_created",
+        "function_path",
     ]
-    list_display = ["task_name", "status", "date_done"]
+    search_fields = ["task_name", "task_id", "function_path"]
+    list_display = ["task_name", "function_path", "status", "date_done"]
+    list_filter = ["status", "date_done"]
