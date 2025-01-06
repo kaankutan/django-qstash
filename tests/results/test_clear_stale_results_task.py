@@ -6,14 +6,16 @@ from io import StringIO
 import pytest
 from django.utils import timezone
 
+from django_qstash.db.models import TaskStatus
 from django_qstash.results.models import TaskResult
 from django_qstash.results.tasks import DJANGO_QSTASH_RESULT_TTL
 from django_qstash.results.tasks import clear_stale_results_task
+from django_qstash.results.tasks import clear_task_errors_task
 
 
 @pytest.fixture
 def create_task_result():
-    def _create_task_result(task_id, age=None, status="SUCCESS"):
+    def _create_task_result(task_id, age=None, status=TaskStatus.SUCCESS):
         date_done = timezone.now()
         if age:
             if isinstance(age, (int, float)):
@@ -44,7 +46,7 @@ class TestClearStaleResults:
         TaskResult.objects.create(
             task_id="stale-task",
             task_name="test.stale",
-            status="SUCCESS",
+            status=TaskStatus.SUCCESS,
             date_done=stale_date,
         )
 
@@ -52,7 +54,7 @@ class TestClearStaleResults:
         recent_task = TaskResult.objects.create(
             task_id="recent-task",
             task_name="test.recent",
-            status="SUCCESS",
+            status=TaskStatus.SUCCESS,
             date_done=timezone.now(),
         )
 
@@ -75,7 +77,7 @@ class TestClearStaleResults:
         TaskResult.objects.create(
             task_id="older-task",
             task_name="test.older",
-            status="SUCCESS",
+            status=TaskStatus.SUCCESS,
             date_done=four_hours_old,
         )
 
@@ -84,7 +86,7 @@ class TestClearStaleResults:
         newer_task = TaskResult.objects.create(
             task_id="newer-task",
             task_name="test.newer",
-            status="SUCCESS",
+            status=TaskStatus.SUCCESS,
             date_done=two_hours_old,
         )
 
@@ -101,7 +103,14 @@ class TestClearStaleResults:
         assert len(remaining_tasks) == 1
         assert remaining_tasks[0].task_id == newer_task.task_id
 
-    @pytest.mark.parametrize("status", ["SUCCESS", "FAILURE", "PENDING", "STARTED"])
+    @pytest.mark.parametrize(
+        "status",
+        [
+            TaskStatus.SUCCESS,
+            TaskStatus.PENDING,
+            TaskStatus.UNKNOWN,
+        ],
+    )
     def test_clear_stale_results_different_statuses(
         self, create_task_result, stdout, status
     ):
@@ -110,6 +119,28 @@ class TestClearStaleResults:
         create_task_result("recent-task")  # Create a recent task
 
         clear_stale_results_task(stdout=stdout)
+
+        output = stdout.getvalue()
+        assert "Successfully deleted 1 stale results" in output
+        assert TaskResult.objects.count() == 1
+        assert TaskResult.objects.first().task_id == "recent-task"
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            TaskStatus.EXECUTION_ERROR,
+            TaskStatus.INTERNAL_ERROR,
+            TaskStatus.OTHER_ERROR,
+        ],
+    )
+    def test_clear_stale_error_different_statuses(
+        self, create_task_result, stdout, status
+    ):
+        # Create one stale task with the given status
+        create_task_result(f"stale-task-{status}", age=timedelta(days=8), status=status)
+        create_task_result("recent-task")  # Create a recent task
+
+        clear_task_errors_task(stdout=stdout)
 
         output = stdout.getvalue()
         assert "Successfully deleted 1 stale results" in output
@@ -133,15 +164,26 @@ class TestClearStaleResults:
                 def count(self):
                     return 1
 
+                def exclude(self, **kwargs):
+                    assert kwargs == {
+                        "status__in": [
+                            TaskStatus.EXECUTION_ERROR,
+                            TaskStatus.INTERNAL_ERROR,
+                            TaskStatus.OTHER_ERROR,
+                        ]
+                    }
+                    return self
+
             return MockQuerySet()
 
         monkeypatch.setattr(
             "django_qstash.results.models.TaskResult.objects.filter", mock_filter
         )
 
-        with pytest.raises(Exception, match="Test error"):
+        with pytest.raises(Exception) as exc_info:
             clear_stale_results_task(stdout=stdout)
 
+        assert str(exc_info.value) == "Test error"
         assert "Error deleting stale results: Test error" in stdout.getvalue()
 
     def test_clear_stale_results_exact_ttl_boundary(self, create_task_result, stdout):

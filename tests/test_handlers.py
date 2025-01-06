@@ -110,7 +110,7 @@ class TestQStashWebhook:
             mock_execute.side_effect = TaskError("Task failed")
             response, status = webhook.handle_request(request)
 
-        assert status == 500
+        assert status == 422
         assert response["status"] == "error"
         assert response["error_type"] == "TaskError"
         assert response["error"] == "Task failed"

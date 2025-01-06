@@ -24,6 +24,11 @@ def test_discovers_basic_task():
             "location": "django_qstash.results.tasks.clear_stale_results_task",
         },
         {
+            "name": "Clear Task Error Results",
+            "field_label": "Clear Task Error Results (django_qstash.results.tasks)",
+            "location": "django_qstash.results.tasks.clear_task_errors_task",
+        },
+        {
             "name": "replace_celery_decorator_task",
             "field_label": "tests.discovery.tasks.replace_celery_decorator_task",
             "location": "tests.discovery.tasks.replace_celery_decorator_task",

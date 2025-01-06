@@ -30,6 +30,10 @@ class TestTaskChoiceField(TestCase):
                 "tests.discovery.tasks.replace_celery_decorator_task",
             ),
             (
+                "django_qstash.results.tasks.clear_task_errors_task",
+                "Clear Task Error Results (django_qstash.results.tasks)",
+            ),
+            (
                 "django_qstash.results.tasks.clear_stale_results_task",
                 "Cleanup Task Results (django_qstash.results.tasks)",
             ),
