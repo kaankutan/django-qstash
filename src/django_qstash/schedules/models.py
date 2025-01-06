@@ -8,6 +8,7 @@ from django.db import models
 from django.utils import timezone
 
 from django_qstash.discovery.models import TaskField
+from django_qstash.schedules.validators import validate_cron_expression
 from django_qstash.schedules.validators import validate_duration_string
 
 DJANGO_QSTASH_DOMAIN = getattr(settings, "DJANGO_QSTASH_DOMAIN", None)
@@ -56,6 +57,7 @@ class TaskSchedule(models.Model):
     cron = models.CharField(
         max_length=255,
         default="*/5 * * * *",
+        validators=[validate_cron_expression],
         verbose_name="Cron Expression",
         help_text="Cron expression for scheduling the task",
     )
