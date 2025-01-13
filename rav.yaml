@@ -14,3 +14,6 @@ scripts:
     - cd sample_project && ../venv/bin/python manage.py shell
   bump:
     - venv/bin/bump2version patch
+  makemigrations:
+    - cd sample_project && ../venv/bin/python manage.py makemigrations
+    - ../venv/bin/python manage.py migrate

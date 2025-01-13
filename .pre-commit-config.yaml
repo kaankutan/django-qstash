@@ -73,3 +73,13 @@ repos:
   rev: 1.3.2
   hooks:
   - id: djade
+- repo: local
+  hooks:
+  - id: makemigrations
+    name: Run makemigrations on sample_project
+    entry: bash -c 'source venv/bin/activate && cd sample_project && python manage.py makemigrations --check --dry-run'
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    deps: ['install-locally']
