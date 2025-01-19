@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django_qstash",
     "django_qstash.results",
     "django_qstash.schedules",
+    "notifications",
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,10 @@ ROOT_URLCONF = "cfehome.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            BASE_DIR / "cfehome" / "templates",
+            BASE_DIR / "notifications" / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
