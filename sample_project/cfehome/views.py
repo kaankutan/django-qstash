@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from django.http import HttpResponse
+from django.shortcuts import render
 
 
 def index(request):
-    return HttpResponse("Hello, Django QStash!")
+    return render(request, 'index.html')
