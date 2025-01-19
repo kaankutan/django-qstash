@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 16px;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        .header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #0d6efd;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .nav-links a:hover {
+            background-color: #e9ecef;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        th:first-child {
+            border-top-left-radius: 8px;
+        }
+        th:last-child {
+            border-top-right-radius: 8px;
+        }
+        tr:last-child td:first-child {
+            border-bottom-left-radius: 8px;
+        }
+        tr:last-child td:last-child {
+            border-bottom-right-radius: 8px;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .task-id {
+            font-family: monospace;
+            font-size: 13px;
+            color: #495057;
+            word-break: break-all;
+            padding-right: 16px;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .result {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-right: 16px;
+        }
+        .result-row {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 16px;
+            margin-bottom: 6px;
+            align-items: baseline;
+        }
+        .result-row:last-child {
+            margin-bottom: 0;
+        }
+        .result-label {
+            color: #6c757d;
+            font-size: 15px;
+            font-weight: 500;
+            text-align: right;
+        }
+        .result-value {
+            color: #212529;
+            font-weight: 400;
+        }
+        .result-value.welcome {
+            color: #0d6efd;
+            font-weight: 500;
+        }
+        .date {
+            white-space: nowrap;
+            color: #6c757d;
+            font-size: 13px;
+            padding-right: 16px;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Task Results Dashboard</h1>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="{% url 'register_user' %}">Registration</a>
+        </div>
+    </div>
+    
+    <table>
+        <tr>
+            <th>Task ID</th>
+            <th>Status</th>
+            <th>Result</th>
+            <th>Date Done</th>
+        </tr>
+        {% for task in tasks %}
+        <tr>
+            <td class="task-id">{{ task.task_id }}</td>
+            <td>
+                <span class="status {% if task.status == 'SUCCESS' %}success{% elif task.status == 'FAILURE' %}error{% endif %}">
+                    {{ task.status }}
+                </span>
+            </td>
+            <td>
+                <div class="result">
+                    {% with result=task.result %}
+                        <div class="result-row">
+                            <span class="result-label">Email:</span>
+                            <span class="result-value">{{ result.email }}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Type:</span>
+                            <span class="result-value welcome">{{ result.type }}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Message:</span>
+                            <span class="result-value">{{ result.message }}</span>
+                        </div>
+                    {% endwith %}
+                </div>
+            </td>
+            <td class="date">{{ task.date_done|date:"M j, Y, g:i a" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="empty-message">No tasks found in the last 24 hours.</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

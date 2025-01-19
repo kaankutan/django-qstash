@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register for Notifications</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #0d6efd;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .nav-links a:hover {
+            background-color: #e9ecef;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-title {
+            margin: 0 0 20px 0;
+            color: #212529;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .form-description {
+            color: #6c757d;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            font-weight: 500;
+            color: #495057;
+        }
+        input[type="email"] {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+        }
+        button {
+            padding: 12px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0b5ed7;
+        }
+        button:active {
+            background-color: #0a58ca;
+        }
+        .features {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+        .features h3 {
+            color: #212529;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .features ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .features li::before {
+            content: "✓";
+            color: #198754;
+            font-weight: bold;
+        }
+        .demo-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .demo-warning::before {
+            content: "ℹ️";
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Notification System</h1>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="{% url 'task_dashboard' %}">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="form-title">Register for Notifications</h2>
+        <p class="form-description">
+            Sign up to receive important updates and reminders. We'll send you a welcome
+            message right away and a friendly reminder in 24 hours.
+        </p>
+
+        <div class="demo-warning">
+            This is a demo project that simulates email notifications. No actual emails will be sent - it's designed to showcase how django-qstash works as a Celery replacement.
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+
+        <div class="features">
+            <h3>What you'll get:</h3>
+            <ul>
+                <li>Instant welcome notification</li>
+                <li>Reminder after 24 hours</li>
+                <li>Track notification status via <a href="https://console.upstash.com/">Upstash Console</a></li>
+                <li>View delivery results in <a href="{% url 'task_dashboard' %}">Task Dashboard</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
