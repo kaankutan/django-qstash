@@ -43,7 +43,7 @@ This allows us to:
   - [Installation](#installation)
     - [Using Pip](#using-pip)
     - [Update Settings (`settings.py`)](#update-settings-settingspy)
-    - [Configure Webhook URL](#configure-webhook-url)
+    - [Configure QStash Webhook Handler](#configure-qstash-webhook-handler)
     - [Required Environment Variables](#required-environment-variables)
   - [Sample Project](#sample-project)
   - [Dependencies](#dependencies)
@@ -94,19 +94,26 @@ INSTALLED_APPS = [
 - `django_qstash.results` (Optional): Store task results in Django DB
 - `django_qstash.schedules` (Optional): Use QStash Schedules to run your `django_qstash` tasks. Out of the box support for _django_qstash_ `@stashed_task`. Schedule tasks using _cron_ (e.g. `0 0 * * *`) format which is required based on [QStash Schedules](https://upstash.com/docs/qstash/features/schedules). use [contrab.guru](https://crontab.guru/) for writing the cron format.
 
-### Configure Webhook URL
+### Configure QStash Webhook Handler
+
+Set it and forget it. `django_qstash` will handle the webhook from qstash automatically for you.
 
 In your `ROOT_URLCONF` (e.g. `urls.py`), add the following:
+
 ```python
-from django_qstash.views import qstash_webhook_view
+from django.urls import include
 
 urlpatterns = [
     # ...
-    path("qstash/webhook/", qstash_webhook_view),
+    path("qstash/webhook/", include("django_qstash.urls")),
     # ...
 ]
 ```
 Be sure to use this path in your `DJANGO_QSTASH_WEBHOOK_PATH` environment variable.
+
+
+The `django_qstash` webhook handler runs your `@shared_task` or `@stashed_task` functions via the `importlib` module. In other words, you should not need to modify the webhook handler.
+
 
 ### Required Environment Variables
 
