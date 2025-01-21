@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.14] - 2025-01-22
+
+### Added
+- Added `django_qstash.urls` as default for `ROOT_URLCONF`
+- Updated `README.md` with new information
+- Updated `sample_project` with a few more examples (thanks @Abdusshh)
+
 ## [0.0.13] - 2025-01-14
 
 ### Added
@@ -100,8 +107,8 @@ No changes, testing bump2version.
 - Tox configuration for multiple Python and Django versions
 - Documentation and examples
 
-
-[0.0.13]: https://github.com/jmitchel3/django-qstash/compare/v0.0.13...HEAD
+[0.0.14]: https://github.com/jmitchel3/django-qstash/compare/v0.0.14...HEAD
+[0.0.13]: https://github.com/jmitchel3/django-qstash/compare/v0.0.13...v0.0.14
 [0.0.12]: https://github.com/jmitchel3/django-qstash/compare/v0.0.12...v0.0.13
 [0.0.11]: https://github.com/jmitchel3/django-qstash/compare/v0.0.11...v0.0.12
 [0.0.10]: https://github.com/jmitchel3/django-qstash/compare/v0.0.10...v0.0.11
