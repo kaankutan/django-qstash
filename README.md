@@ -326,7 +326,7 @@ Various options are available to configure django-qstash.
 
 ### Example Django Settings
 
-For a complete example, review [sample_project/settings.py](sample_project/settings.py) where [python-decouple](https://github.com/henriquebastos/python-decouple) is used to set the environment variables via the `.env` file or system environment variables (for production use).
+For a complete example, review [sample_project/cfehome/settings.py](sample_project/cfehome/settings.py) where [python-decouple](https://github.com/henriquebastos/python-decouple) is used to set the environment variables via the `.env` file or system environment variables (for production use).
 
 Using `os.environ`:
 ```python

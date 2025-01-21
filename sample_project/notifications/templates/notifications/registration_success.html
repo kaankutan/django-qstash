@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Successful</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+        }
+        .success-card {
+            background: #d4edda;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success-title {
+            color: #155724;
+            margin: 0 0 16px 0;
+            font-size: 28px;
+        }
+        .success-message {
+            color: #1e7e34;
+            font-size: 18px;
+            margin: 0;
+        }
+        .task-info {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .task-title {
+            color: #212529;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+        }
+        .task-id {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 8px 0;
+            color: #495057;
+        }
+        .task-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+        .info-text {
+            color: #6c757d;
+            font-size: 16px;
+            margin: 16px 0;
+        }
+        .view-dashboard {
+            display: inline-block;
+            background: #0d6efd;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+        .view-dashboard:hover {
+            background: #0b5ed7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-card">
+            <h1 class="success-title">Registration Successful!</h1>
+            <p class="success-message">Thank you for registering with email: {{ email }}</p>
+        </div>
+
+        <div class="task-info">
+            <h2 class="task-title">Task Information</h2>
+            
+            <div class="task-label">Welcome Email Task ID:</div>
+            <div class="task-id">{{ welcome_task_id }}</div>
+            
+            <div class="task-label">Reminder Email Task ID:</div>
+            <div class="task-id">{{ reminder_task_id }}</div>
+            
+            <p class="info-text">✉️ A welcome email has been sent immediately, and a reminder will be sent in 24 hours.</p>
+            
+            <a href="{% url 'task_dashboard' %}" class="view-dashboard">View Task Dashboard →</a>
+        </div>
+    </div>
+</body>
+</html>
