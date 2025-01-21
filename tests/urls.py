@@ -1,7 +1,8 @@
+from __future__ import annotations
+
+from django.urls import include
 from django.urls import path
 
-from django_qstash.views import qstash_webhook_view
-
 urlpatterns = [
-    path("qstash/webhook/", qstash_webhook_view, name="qstash-webhook"),
+    path("qstash/webhook/", include("django_qstash.urls")),
 ]
