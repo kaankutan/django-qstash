@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.15] - 2025-01-24
+
+### Added
+- Support for local development with QStash via Docker Compose and [these docs](https://upstash.com/docs/qstash/howto/local-development)
+- `QSTASH_URL` support for the django-qstash QStash client
+- Docker Compose sample [compose.dev.yaml](./compose.dev.yaml) for local development
+
 ## [0.0.14] - 2025-01-22
 
 ### Added
