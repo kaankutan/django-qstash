@@ -57,7 +57,9 @@ This allows us to:
     - [Arguments Must be JSON-ready](#arguments-must-be-json-ready)
     - [Example Task](#example-task)
   - [Management Commands](#management-commands)
-  - [Public Domain In Development](#public-domain-in-development)
+  - [Development](#development)
+    - [Development with a Public Domain](#development-with-a-public-domain)
+    - [Development with Docker Compose](#development-with-docker-compose)
   - [Django Settings Configuration](#django-settings-configuration)
     - [`DJANGO_QSTASH_DOMAIN`](#django_qstash_domain)
     - [`DJANGO_QSTASH_WEBHOOK_PATH`](#django_qstash_webhook_path)
@@ -290,14 +292,32 @@ _Requires `django_qstash.schedules` installed._
 - `python manage.py task_schedules --list` see all schedules relate to the `DJANGO_QSTASH_DOMAIN`
 - `python manage.py task_schedules --sync` sync schedules based on the `DJANGO_QSTASH_DOMAIN` to store in the Django Admin.
 
-## Public Domain In Development
+## Development
 
-django-qstash _requires_ a publicly accessible domain to work (e.g. `https://djangoqstash.com`). There are many ways to do this, we recommend:
+During development, you have two options:
+
+- Use Upstash.com with a publicly accessible domain (preferred)
+- Use Docker Compose with [compose.dev.yaml](./compose.dev.yaml)
+
+### Development with a Public Domain
+
+The closer your development environment is to production the better. For that reason, using a publicly accessible domain is the preferred with to develop with _django-qstash_.
+
+To get a public domain during development, we recommend any of the following:
 
 - [Cloudflare Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) with a domain name you control.
 - [ngrok](https://ngrok.com/)
 
 Once you have a domain name, you can configure the `DJANGO_QSTASH_DOMAIN` setting in your Django settings.
+
+### Development with Docker Compose
+Upstash covers how to run QStash during development on [this guide](https://upstash.com/docs/qstash/howto/local-development)
+
+In our case we need to the following things:
+
+- `docker compose -f compose.dev.yaml up`
+- Add `QSTASH_URL=http://127.0.0.1:8585` to your `.env` file.
+- Use the `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, and `QSTASH_NEXT_SIGNING_KEY` the terminal output of Docker compose _or_ the values listed in [compose.dev.yaml](./compose.dev.yaml).
 
 ## Django Settings Configuration
 
@@ -342,10 +362,13 @@ CSRF_TRUSTED_ORIGINS = [os.environ.get("CSRF_TRUSTED_ORIGIN")]
 ###########################
 # qstash-py settings
 ###########################
+USE_LOCAL_QSTASH = str(os.environ.get("USE_LOCAL_QSTASH")) == "1"
 QSTASH_TOKEN = os.environ.get("QSTASH_TOKEN")
 QSTASH_CURRENT_SIGNING_KEY = os.environ.get("QSTASH_CURRENT_SIGNING_KEY")
 QSTASH_NEXT_SIGNING_KEY = os.environ.get("QSTASH_NEXT_SIGNING_KEY")
-
+if DJANGO_DEBUG and USE_LOCAL_QSTASH:
+    # connect to the docker compose qstash instance
+    os.environ["QSTASH_URL"] = "http://127.0.0.1:8585"
 ###########################
 # django_qstash settings
 ###########################

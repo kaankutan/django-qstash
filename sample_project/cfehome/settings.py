@@ -6,6 +6,7 @@ See https://cfe.sh/github to see more.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from decouple import config
@@ -14,18 +15,32 @@ from django.core.management.utils import get_random_secret_key
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
-
 SECRET_KEY = config("DJANGO_SECRET_KEY", default=get_random_secret_key())
-# required by qstash-py
+
+
+###########################
+# qstash-py settings
+###########################
+QSTASH_URL = config("QSTASH_URL", default=None)
+if DEBUG and QSTASH_URL is not None:
+    # if python-decouple loads the QSTASH_URL from the
+    # .env file, then we will set the environment variable
+    # django-qstash will use to connect to the local
+    # qstash instance.
+    os.environ["QSTASH_URL"] = QSTASH_URL
+
 QSTASH_TOKEN = config("QSTASH_TOKEN")
 QSTASH_CURRENT_SIGNING_KEY = config("QSTASH_CURRENT_SIGNING_KEY")
 QSTASH_NEXT_SIGNING_KEY = config("QSTASH_NEXT_SIGNING_KEY")
 
-# required by django-qstash
+###########################
+# django_qstash settings
+###########################
 DJANGO_QSTASH_DOMAIN = config("DJANGO_QSTASH_DOMAIN")
 DJANGO_QSTASH_WEBHOOK_PATH = config(
     "DJANGO_QSTASH_WEBHOOK_PATH", default="/qstash/webhook/"
 )
+
 # Dangerous: disable host header validation
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = config(
