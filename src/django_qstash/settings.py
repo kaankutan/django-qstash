@@ -11,7 +11,7 @@ DJANGO_QSTASH_WEBHOOK_PATH = getattr(
 )
 if not QSTASH_TOKEN or not DJANGO_QSTASH_DOMAIN:
     warnings.warn(
-        "QSTASH_TOKEN and DJANGO_QSTASH_DOMAIN should be set for QStash functionality",
+        "DJANGO_SETTINGS_MODULE (settings.py required) requires QSTASH_TOKEN and DJANGO_QSTASH_DOMAIN should be set for QStash functionality",
         RuntimeWarning,
         stacklevel=2,
     )

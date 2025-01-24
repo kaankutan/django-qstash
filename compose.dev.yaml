@@ -1,0 +1,11 @@
+services:
+  qstash_dev:
+    image: public.ecr.aws/upstash/qstash:latest
+    command: qstash dev
+    ports:
+      - 8585:8080
+    environment:
+      - QSTASH_URL=http://localhost:8585
+      - QSTASH_TOKEN=eyJVc2VySUQiOiJkZWZhdWx0VXNlciIsIlBhc3N3b3JkIjoiZGVmYXVsdFBhc3N3b3JkIn0=
+      - QSTASH_CURRENT_SIGNING_KEY=sig_7kYjw48mhY7kAjqNGcy6cr29RJ6r
+      - QSTASH_NEXT_SIGNING_KEY=sig_5ZB6DVzB1wjE8S6rZ7eenA8Pdnhs

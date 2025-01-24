@@ -17,3 +17,5 @@ scripts:
   makemigrations:
     - cd sample_project && ../venv/bin/python manage.py makemigrations
     - ../venv/bin/python manage.py migrate
+  qstash_dev:
+    - docker compose -f compose.dev.yaml up
