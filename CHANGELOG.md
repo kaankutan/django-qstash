@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Support for local development with QStash via Docker Compose and [these docs](https://upstash.com/docs/qstash/howto/local-development)
 - `QSTASH_URL` support for the django-qstash QStash client
 - Docker Compose sample [compose.dev.yaml](./compose.dev.yaml) for local development
+- Upgraded Django in tests due to security vulnerability.
 
 ## [0.0.14] - 2025-01-22
 
@@ -114,7 +115,8 @@ No changes, testing bump2version.
 - Tox configuration for multiple Python and Django versions
 - Documentation and examples
 
-[0.0.14]: https://github.com/jmitchel3/django-qstash/compare/v0.0.14...HEAD
+[0.0.15]: https://github.com/jmitchel3/django-qstash/compare/v0.0.15...HEAD
+[0.0.14]: https://github.com/jmitchel3/django-qstash/compare/v0.0.14...v0.0.15
 [0.0.13]: https://github.com/jmitchel3/django-qstash/compare/v0.0.13...v0.0.14
 [0.0.12]: https://github.com/jmitchel3/django-qstash/compare/v0.0.12...v0.0.13
 [0.0.11]: https://github.com/jmitchel3/django-qstash/compare/v0.0.11...v0.0.12
