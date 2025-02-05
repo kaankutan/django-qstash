@@ -1,8 +1,8 @@
-> :warning: **BETA Software**: Working on being production-ready soon.
-
 # django-qstash
 
-_django-qstash_ is a drop-in replacement for Celery's `shared_task`.
+Run background tasks with Django through webhooks and Upstash QStash.
+
+_django-qstash_ is designed to be a drop-in replacement for Celery's `shared_task` or run alongside Celery.
 
 
 ## How it works
@@ -17,7 +17,7 @@ from django_qstash import shared_task
 def my_task():
     pass
 ```
-> To use Celery too, you can use `@stashed_task` instead of `@shared_task` more below.
+> To use django-qstash with Celery, you can use `@stashed_task` instead of `@shared_task` (more below).
 
 To do this we need:
 
