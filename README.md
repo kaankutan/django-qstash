@@ -4,6 +4,8 @@ Run background tasks with Django through webhooks and Upstash QStash.
 
 _django-qstash_ is designed to be a drop-in replacement for Celery's `shared_task` or run alongside Celery.
 
+## Learn
+Step-by-Step [tutorial on YouTube](https://www.youtube.com/playlist?list=PLEsfXFp6DpzQgNC8Q_ijgqxCVRtSC4_-L) on my [@CodingEntrepreneurs](https://cfe.sh/youtube) Youtube channel.
 
 ## How it works
 
