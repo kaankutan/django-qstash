@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.1] - 2025-02-06`
+## [0.1.1] - 2025-02-06
 
 ### Added
 - Fix results stored in `TaskResult` model result field. (Was stored as a JSON string, but should be a JSON object via a Python dict)
