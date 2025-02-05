@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2025-02-06`
+
+### Added
+- Fix results stored in `TaskResult` model result field. (Was stored as a JSON string, but should be a JSON object via a Python dict)
+
 ## [0.1.0] - 2025-02-05
 
 ### Added
@@ -120,7 +125,9 @@ No changes, testing bump2version.
 - Tox configuration for multiple Python and Django versions
 - Documentation and examples
 
-[0.0.15]: https://github.com/jmitchel3/django-qstash/compare/v0.0.15...HEAD
+[0.1.1]: https://github.com/jmitchel3/django-qstash/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/jmitchel3/django-qstash/compare/v0.0.15...v0.1.1
+[0.0.15]: https://github.com/jmitchel3/django-qstash/compare/v0.0.15...v0.1.0
 [0.0.14]: https://github.com/jmitchel3/django-qstash/compare/v0.0.14...v0.0.15
 [0.0.13]: https://github.com/jmitchel3/django-qstash/compare/v0.0.13...v0.0.14
 [0.0.12]: https://github.com/jmitchel3/django-qstash/compare/v0.0.12...v0.0.13
