@@ -145,7 +145,7 @@
             <a href="{% url 'register_user' %}">Registration</a>
         </div>
     </div>
-    
+
     <table>
         <tr>
             <th>Task ID</th>
@@ -163,20 +163,12 @@
             </td>
             <td>
                 <div class="result">
-                    {% with result=task.result %}
+                    {% for key, value in task.result.items %}
                         <div class="result-row">
-                            <span class="result-label">Email:</span>
-                            <span class="result-value">{{ result.email }}</span>
+                            <span class="result-label">{{ key|title }}:</span>
+                            <span class="result-value">{{ value }}</span>
                         </div>
-                        <div class="result-row">
-                            <span class="result-label">Type:</span>
-                            <span class="result-value welcome">{{ result.type }}</span>
-                        </div>
-                        <div class="result-row">
-                            <span class="result-label">Message:</span>
-                            <span class="result-value">{{ result.message }}</span>
-                        </div>
-                    {% endwith %}
+                    {% endfor %}
                 </div>
             </td>
             <td class="date">{{ task.date_done|date:"M j, Y, g:i a" }}</td>

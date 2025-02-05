@@ -12,14 +12,31 @@ from django_qstash.db.models import TaskStatus
 logger = logging.getLogger(__name__)
 
 
-def function_result_to_json(result: Any) -> str:
-    """Convert a function result to a JSON string"""
-    try:
-        data = {"result": result}
-        return json.dumps(data)
-    except Exception as e:
-        logger.exception("Failed to convert function result to JSON: %s", str(e))
+def function_result_to_dict(result: Any) -> dict | None:
+    """
+    Convert a task result to a Python dict for the result JSONField.
+
+    Args:
+        result: Any Python value to be converted
+
+    Returns:
+        dict: A dictionary representation of the result
+        None: If the input is None
+    """
+    if result is None:
         return None
+    elif isinstance(result, dict):
+        return result
+    elif isinstance(result, str):
+        try:
+            parsed = json.loads(result)
+            if isinstance(parsed, dict):
+                return parsed
+            return {"result": parsed}
+        except json.JSONDecodeError as e:
+            logger.info("Task result is not a JSON string: %s", str(e))
+            return {"result": result}
+    return {"result": result}
 
 
 def store_task_result(
@@ -44,7 +61,7 @@ def store_task_result(
             task_name=task_name,
             status=status,
             date_done=timezone.now(),
-            result=function_result_to_json(result),
+            result=function_result_to_dict(result),
             traceback=traceback,
             args=args,
             kwargs=kwargs,
