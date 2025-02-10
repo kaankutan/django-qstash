@@ -436,8 +436,8 @@ desired_task = "django_qstash.results.clear_stale_results_task"
 # or desired_task = "example_app.tasks.my_task"
 
 task_to_use = desired_task
-if desired_task not in available_task_locations:
-    task_to_use = available_task_locations[0]
+if desired_task not in all_available_tasks:
+    task_to_use = all_available_tasks[0]
 
 print(f"Using task: {task_to_use}")
 
