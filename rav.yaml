@@ -4,6 +4,8 @@ description: Rav is a shortcut to run commands on your local machine.
 scripts:
   install:
     - venv/bin/python3 -m pip install -e .
+  compile_test_requirements:
+    - venv/bin/python3 tests/requirements/compile.py
   test:
     - venv/bin/tox run -f py312
     - venv/bin/coverage combine

@@ -21,103 +21,47 @@ if __name__ == "__main__":
         *sys.argv[1:],
     ]
     run = partial(subprocess.run, check=True)
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.10",
-            "--output-file",
-            "py310-django42.txt",
-        ],
-        input=b"Django>=4.2a1,<5.0",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.10",
-            "--output-file",
-            "py310-django50.txt",
-        ],
-        input=b"Django>=5.0a1,<5.1",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.10",
-            "--output-file",
-            "py310-django51.txt",
-        ],
-        input=b"Django>=5.1a1,<5.2",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.11",
-            "--output-file",
-            "py311-django42.txt",
-        ],
-        input=b"Django>=4.2a1,<5.0",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.11",
-            "--output-file",
-            "py311-django50.txt",
-        ],
-        input=b"Django>=5.0a1,<5.1",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.11",
-            "--output-file",
-            "py311-django51.txt",
-        ],
-        input=b"Django>=5.1a1,<5.2",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.12",
-            "--output-file",
-            "py312-django42.txt",
-        ],
-        input=b"Django>=4.2a1,<5.0",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.12",
-            "--output-file",
-            "py312-django50.txt",
-        ],
-        input=b"Django>=5.0a1,<5.1",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.12",
-            "--output-file",
-            "py312-django51.txt",
-        ],
-        input=b"Django>=5.1a1,<5.2",
-    )
-    run(
-        [
-            *common_args,
-            "--python",
-            "3.13",
-            "--output-file",
-            "py313-django51.txt",
-        ],
-        input=b"Django>=5.1a1,<5.2",
-    )
+
+    # Define Python versions and Django versions
+    python_versions = ["3.10", "3.11", "3.12", "3.13"]
+    django_versions = {
+        "42": "Django>=4.2a1,<5.0",
+        "50": "Django>=5.0a1,<5.1",
+        "51": "Django>=5.1a1,<5.2",
+        "52": "Django>=5.2a1,<5.3",
+    }
+
+    # Define the specific combinations to run
+    # Format: (python_version, django_version)
+    combinations = [
+        ("3.10", "42"),
+        ("3.10", "50"),
+        ("3.10", "51"),
+        ("3.10", "52"),
+        ("3.11", "42"),
+        ("3.11", "50"),
+        ("3.11", "51"),
+        ("3.11", "52"),
+        ("3.12", "42"),
+        ("3.12", "50"),
+        ("3.12", "51"),
+        ("3.12", "52"),
+        ("3.13", "51"),
+        ("3.13", "52"),
+    ]
+
+    # Run the combinations
+    for py_version, dj_version in combinations:
+        output_file = f"py{py_version.replace('.', '')}-django{dj_version}.txt"
+        django_constraint = django_versions[dj_version]
+
+        run(
+            [
+                *common_args,
+                "--python",
+                py_version,
+                "--output-file",
+                output_file,
+            ],
+            input=django_constraint.encode(),
+        )
