@@ -34,7 +34,7 @@ classifiers = [
 
 dependencies = [
   "django>=4.2",
-  "qstash>=2",
+  "qstash>=2,<3",
   "requests>=2.30",
 ]
 urls.Changelog = "https://github.com/jmitchel3/django-qstash"
