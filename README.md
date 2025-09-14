@@ -237,6 +237,42 @@ hello_world.apply_async(
 )
 ```
 
+#### Revoking a Task
+
+You can revoke a pending task using the `revoke` function with the task ID or by calling the `revoke` method on the `AsyncResult` instance. This attempts to revoke the task in QStash and updates the task status in the database to "CANCELED" if a `TaskResult` record exists.
+
+Using the standalone `revoke` function:
+
+```python
+from django_qstash import revoke
+
+result = hello_world.delay("Tony Stark", age=40, activity="building in a cave with a box of scraps.")
+success = revoke(result.id)  # Returns True if successful, False otherwise
+```
+
+Using the `revoke` method on `AsyncResult`:
+
+```python
+result = hello_world.delay("Tony Stark", age=40, activity="building in a cave with a box of scraps.")
+success = result.revoke()  # Returns True if successful, False otherwise
+```
+
+Here's an example with a delay to simulate waiting before revoking:
+
+```python
+result = hello_world.apply_async(
+    args=("Tony Stark",),
+    kwargs={"activity": "building in a cave with a box of scraps."},
+    countdown=10,  # Delay the task by 10 seconds
+)
+time.sleep(2)  # Wait 2 seconds before revoking
+success = result.revoke()  # Attempt to revoke the task
+```
+
+- Revocation is only effective for tasks that are still pending in QStash (not yet processed).
+- If the task has already started or completed, revocation may not take effect.
+- The function/method handles exceptions gracefully and logs errors if revocation fails.
+
 ### Arguments Must be JSON-ready
 
 Arguments to django-qstash managed functions must be _JSON_ serializable.

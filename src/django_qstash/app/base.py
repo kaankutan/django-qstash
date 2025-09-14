@@ -8,6 +8,8 @@ from django.core.exceptions import ImproperlyConfigured
 
 from django_qstash.callbacks import get_callback_url
 from django_qstash.client import qstash_client
+from django_qstash.results.models import TaskResult
+from django_qstash.db.models import TaskStatus
 from django_qstash.settings import DJANGO_QSTASH_DOMAIN
 from django_qstash.settings import QSTASH_TOKEN
 
@@ -109,7 +111,7 @@ class AsyncResult:
     """Minimal Celery AsyncResult-compatible class"""
 
     def __init__(self, task_id: str):
-        self.task_id = task_id
+        self.task_id = task_id  
 
     def get(self, timeout: int | None = None) -> Any:
         """Simulate Celery's get() method"""
@@ -118,3 +120,18 @@ class AsyncResult:
     @property
     def id(self) -> str:
         return self.task_id
+
+    def revoke(self) -> bool:
+        """Revoke (cancel) the task using the revoke function."""
+        return revoke(self.task_id)
+
+
+def revoke(task_id: str) -> bool:
+    """Revoke (cancel) a task using QStash's cancel API and update DB if possible."""
+    try:
+        qstash_client.message.cancel(task_id)
+        # Update DB status if TaskResult exists
+        TaskResult.objects.filter(task_id=task_id).update(status=TaskStatus.CANCELED)
+        return True
+    except Exception as e:
+        return False

@@ -6,6 +6,10 @@ from unittest.mock import patch
 import pytest
 
 from django_qstash.app import stashed_task
+from django_qstash.app.base import AsyncResult
+from django_qstash.app.base import revoke
+from django_qstash.db.models import TaskStatus
+from django_qstash.results.models import TaskResult
 
 
 @stashed_task
@@ -27,6 +31,7 @@ def mock_qstash_client():
         mock_response = Mock()
         mock_response.message_id = "test-id-123"
         mock_message.publish_json = Mock(return_value=mock_response)
+        mock_message.cancel = Mock()  # Mock cancel method
 
         # Attach the mock message object to the client
         mock_client.message = mock_message
@@ -59,3 +64,36 @@ class TestQStashTasks:
         assert result.task_id == "test-id-123"
         call_kwargs = mock_qstash_client.message.publish_json.call_args[1]
         assert call_kwargs["delay"] == "60s"
+
+    def test_task_revoke_function(self, mock_qstash_client):
+        """Test that revoke() function calls QStash cancel and updates DB status"""
+        task_id = "test-revoke-id"
+        # Create a TaskResult in DB
+        task_result = TaskResult.objects.create(task_id=task_id, task_name="test_task")
+
+        # Call revoke function
+        success = revoke(task_id)
+
+        # Assert QStash cancel was called
+        mock_qstash_client.message.cancel.assert_called_once_with(task_id)
+        # Assert DB status was updated
+        task_result.refresh_from_db()
+        assert task_result.status == TaskStatus.CANCELED
+        assert success is True
+
+    def test_task_revoke_method(self, mock_qstash_client):
+        """Test that AsyncResult.revoke() method calls QStash cancel and updates DB status"""
+        task_id = "test-revoke-method-id"
+        # Create a TaskResult in DB
+        task_result = TaskResult.objects.create(task_id=task_id, task_name="test_task")
+
+        # Create AsyncResult and call revoke method
+        result = AsyncResult(task_id)
+        success = result.revoke()
+
+        # Assert QStash cancel was called
+        mock_qstash_client.message.cancel.assert_called_once_with(task_id)
+        # Assert DB status was updated
+        task_result.refresh_from_db()
+        assert task_result.status == TaskStatus.CANCELED
+        assert success is True
